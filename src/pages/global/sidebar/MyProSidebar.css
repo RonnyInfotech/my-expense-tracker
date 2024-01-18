@@ -41,3 +41,20 @@
     align-items: center;
     margin-left: 15px;
 }
+
+.user-image-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-image {
+    background-color: #141b2d;
+}
+
+.menu-header {
+    margin: 15px 20px 5px 20px;
+    color: #a3a3a3;
+    font-weight: 500;
+    font-size: 13px;
+}

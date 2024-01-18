@@ -7,7 +7,6 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "../node_modules/primeflex/primeflex.css";
 import "../node_modules/primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
-
 import Dashboard from "./pages/dashboard";
 import Team from "./pages/team";
 import Invoices from "./pages/invoices";
