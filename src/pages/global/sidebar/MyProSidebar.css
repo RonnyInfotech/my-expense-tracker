@@ -1,0 +1,43 @@
+.side-bar-menu {
+    position: sticky;
+    display: flex;
+    height: 100vh;
+    top: 0;
+    bottom: 0;
+    z-index: 10000;
+}
+
+.sidebar {
+    border: none;
+}
+
+.menu-icon {
+    background-color: transparent !important;
+}
+
+.menu-item {
+    background-color: transparent !important;
+}
+
+.menu-anchor {
+    color: inherit !important;
+    background-color: transparent !important;
+
+}
+
+.menu-item:hover {
+    color: #6870fa !important;
+    background-color: transparent !important;
+}
+
+.menu-item.active {
+    color: #4cceac !important;
+    background-color: transparent !important;
+}
+
+.side-bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 15px;
+}

@@ -1,0 +1,77 @@
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap");
+
+html,
+body,
+#root,
+.app,
+.content {
+  font-family: "Source Sance Pro", sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #e0e0e0;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+
+/* custom css */
+.card-text {
+  font-family: verdana, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 13px;
+  color: #6f6f6f !important;
+  display: block;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.card-value {
+  margin-top: 10px;
+  font-family: verdana, "Roboto", "Segoe UI", "GeezaPro", "DejaVu Serif", "sans-serif";
+  font-size: 24px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.card-block {
+  padding: 2rem;
+  padding: 1rem;
+}
+
+.balance {
+  color: #797979 !important;
+}
+
+.balance {
+  -moz-border-radius: 3px;
+  background-clip: padding-box;
+  background: #ffffff;
+}
+
+.card {
+  margin-bottom: 16px;
+}
+
+.card {
+  overflow: hidden;
+  background: #FFFFFF;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+#tolbalance {
+  color: #81c868;
+}
