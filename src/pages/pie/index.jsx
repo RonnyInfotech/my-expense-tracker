@@ -1,7 +1,7 @@
 import React from 'react'
 import PieChart from '../../components/PieChart'
 import { Box } from '@mui/material';
-import Header from '../../components/Header';
+import Header from '../../components/Header/Header';
 // import { useTheme } from '@mui/material';
 // import { tokens } from '../../theme';
 const Bar = () => {
