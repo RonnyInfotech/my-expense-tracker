@@ -126,7 +126,7 @@ const MyProSidebar = () => {
             <Item
               title="All Transactions"
               to="/invoices"
-              icon={<i class="fa fa-list-alt" aria-hidden="true" />}
+              icon={<i className="fa fa-list-alt" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
@@ -137,21 +137,21 @@ const MyProSidebar = () => {
             <Item
               title="Categories"
               to="/form"
-              icon={<i class="fa fa-archive" aria-hidden="true" />}
+              icon={<i className="fa fa-archive" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="Report"
               to="/calendar"
-              icon={<i class="fa fa-calendar-o" aria-hidden="true" />}
+              icon={<i className="fa fa-calendar-o" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="FAQ Page"
               to="/faq"
-              icon={<i class="fa fa-question-circle-o" aria-hidden="true" />}
+              icon={<i className="fa fa-question-circle-o" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
