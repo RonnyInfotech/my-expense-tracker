@@ -24,6 +24,7 @@
     "@testing-library/user-event": "^13.5.0",
     "chart.js": "^4.4.1",
     "formik": "^2.2.9",
+    "intro.js-react": "^1.0.0",
     "primeflex": "^3.3.1",
     "primeicons": "^6.0.1",
     "primereact": "^10.0.9",

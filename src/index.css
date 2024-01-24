@@ -75,3 +75,8 @@ body,
 #tolbalance {
   color: #81c868;
 }
+
+.main {
+  display: grid;
+  grid-template-columns: auto 3fr;
+}
