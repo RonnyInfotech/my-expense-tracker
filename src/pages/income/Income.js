@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { classNames } from 'primereact/utils';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
@@ -12,9 +11,10 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
-import { ProductService } from './ProductService';
+import { ProductService } from '../Expense/ProductService';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
+import './Expense.css';
 
 export default function Income() {
     let emptyProduct = {
@@ -29,12 +29,12 @@ export default function Income() {
         inventoryStatus: 'INSTOCK'
     };
 
-    const [products, setProducts] = useState(null);
-    const [productDialog, setProductDialog] = useState(false);
-    const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-    const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
+    const [expenses, setExpenses] = useState(null);
+    const [expenseDialog, setExpenseDialog] = useState(false);
+    const [deleteExpenseDialog, setDeleteExpenseDialog] = useState(false);
+    const [deleteExpensesDialog, setDeleteExpensesDialog] = useState(false);
     const [product, setProduct] = useState(emptyProduct);
-    const [selectedProducts, setSelectedProducts] = useState(null);
+    const [selectedExpenses, setSelectedExpenses] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
@@ -85,7 +85,7 @@ export default function Income() {
     };
 
     useEffect(() => {
-        ProductService.getProducts().then((data) => setProducts(data));
+        ProductService.getProducts().then((data) => setExpenses(data));
     }, []);
 
     const formatCurrency = (value) => {
@@ -95,27 +95,27 @@ export default function Income() {
     const openNew = () => {
         setProduct(emptyProduct);
         setSubmitted(false);
-        setProductDialog(true);
+        setExpenseDialog(true);
     };
 
     const hideDialog = () => {
         setSubmitted(false);
-        setProductDialog(false);
+        setExpenseDialog(false);
     };
 
     const hideDeleteExpenseDialog = () => {
-        setDeleteProductDialog(false);
+        setDeleteExpenseDialog(false);
     };
 
     const hideDeleteExpensesDialog = () => {
-        setDeleteProductsDialog(false);
+        setDeleteExpensesDialog(false);
     };
 
     const saveExpense = () => {
         setSubmitted(true);
 
         if (product.name.trim()) {
-            let _products = [...products];
+            let _products = [...expenses];
             let _product = { ...product };
 
             if (product.id) {
@@ -130,27 +130,27 @@ export default function Income() {
                 toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
             }
 
-            setProducts(_products);
-            setProductDialog(false);
+            setExpenses(_products);
+            setExpenseDialog(false);
             setProduct(emptyProduct);
         }
     };
 
     const editProduct = (product) => {
         setProduct({ ...product });
-        setProductDialog(true);
+        setExpenseDialog(true);
     };
 
     const confirmDeleteProduct = (product) => {
         setProduct(product);
-        setDeleteProductDialog(true);
+        setDeleteExpenseDialog(true);
     };
 
     const deleteExpense = () => {
-        let _products = products.filter((val) => val.id !== product.id);
+        let _products = expenses.filter((val) => val.id !== product.id);
 
-        setProducts(_products);
-        setDeleteProductDialog(false);
+        setExpenses(_products);
+        setDeleteExpenseDialog(false);
         setProduct(emptyProduct);
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
     };
@@ -158,8 +158,8 @@ export default function Income() {
     const findIndexById = (id) => {
         let index = -1;
 
-        for (let i = 0; i < products.length; i++) {
-            if (products[i].id === id) {
+        for (let i = 0; i < expenses.length; i++) {
+            if (expenses[i].id === id) {
                 index = i;
                 break;
             }
@@ -184,15 +184,15 @@ export default function Income() {
     };
 
     const confirmDeleteSelected = () => {
-        setDeleteProductsDialog(true);
+        setDeleteExpensesDialog(true);
     };
 
     const deleteSelectedExpenses = () => {
-        let _products = products.filter((val) => !selectedProducts.includes(val));
+        let _products = expenses.filter((val) => !selectedExpenses.includes(val));
 
-        setProducts(_products);
-        setDeleteProductsDialog(false);
-        setSelectedProducts(null);
+        setExpenses(_products);
+        setDeleteExpensesDialog(false);
+        setSelectedExpenses(null);
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
     };
 
@@ -225,7 +225,7 @@ export default function Income() {
         return (
             <div className="flex flex-wrap gap-2">
                 <Button label="ADD TRANSACTION" icon="pi pi-plus" severity="success" onClick={openNew} />
-                <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
+                <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedExpenses || !selectedExpenses.length} />
             </div>
         );
     };
@@ -290,13 +290,13 @@ export default function Income() {
             <Button label="CANCEL" icon="pi pi-times" outlined onClick={hideDialog} />
         </React.Fragment>
     );
-    const deleteProductDialogFooter = (
+    const deleteExpenseDialogFooter = (
         <React.Fragment>
             <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpenseDialog} />
             <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteExpense} />
         </React.Fragment>
     );
-    const deleteProductsDialogFooter = (
+    const deleteExpensesDialogFooter = (
         <React.Fragment>
             <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpensesDialog} />
             <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedExpenses} />
@@ -309,23 +309,23 @@ export default function Income() {
             <div className="card">
                 <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
 
-                <DataTable size='small' ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
+                <DataTable size='small' ref={dt} value={expenses} selection={selectedExpenses} onSelectionChange={(e) => setSelectedExpenses(e.value)}
                     dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}>
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} expenses" globalFilter={globalFilter} header={header}>
                     <Column selectionMode="multiple" exportable={false}></Column>
-                    <Column field="code" header="Code" sortable></Column>
-                    <Column field="name" header="Name" sortable></Column>
-                    <Column field="image" header="Image" body={imageBodyTemplate}></Column>
-                    <Column field="price" header="Price" body={priceBodyTemplate} sortable ></Column>
+                    <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column>
                     <Column field="category" header="Category" sortable ></Column>
+                    <Column field="name" header="Date" sortable></Column>
+                    <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column>
+                    <Column field="code" header="Description" sortable></Column>
+                    <Column field="price" header="Amount" body={priceBodyTemplate} sortable ></Column>
                     <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable ></Column>
                     <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable ></Column>
-                    <Column body={actionBodyTemplate} exportable={false} ></Column>
                 </DataTable>
             </div>
 
-            <Dialog visible={productDialog} style={{ width: '40rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="New Transaction" modal className="p-fluid" footer={expenseDialogFooter} onHide={hideDialog}>
+            <Dialog visible={expenseDialog} style={{ width: '40rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="New Transaction" modal className="p-fluid" footer={expenseDialogFooter} onHide={hideDialog}>
                 {product.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
                 <div className="field">
                     <label htmlFor="Descriptions">Descriptions</label>
@@ -392,7 +392,7 @@ export default function Income() {
                 </div>
             </Dialog>
 
-            <Dialog visible={deleteProductDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteExpenseDialog}>
+            <Dialog visible={deleteExpenseDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteExpenseDialogFooter} onHide={hideDeleteExpenseDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                     {product && (
@@ -403,10 +403,10 @@ export default function Income() {
                 </div>
             </Dialog>
 
-            <Dialog visible={deleteProductsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteExpensesDialog}>
+            <Dialog visible={deleteExpensesDialog} style={{ width: '35rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteExpensesDialogFooter} onHide={hideDeleteExpensesDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {product && <span>Are you sure you want to delete the selected products?</span>}
+                    {product && <span>Are you sure you want to delete the selected transaction(s)?</span>}
                 </div>
             </Dialog>
         </div >

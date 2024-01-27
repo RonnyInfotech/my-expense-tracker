@@ -10,7 +10,6 @@ import 'primeicons/primeicons.css';
 import Dashboard from "./pages/dashboard";
 import Team from "./pages/team";
 import Invoices from "./pages/invoices";
-import Contacts from "./pages/contacts";
 import Form from "./pages/form";
 import Calendar from "./pages/calendar";
 import Bar from "./pages/bar";
@@ -18,7 +17,7 @@ import Line from "./pages/line";
 import Pie from "./pages/pie";
 import FAQ from "./pages/faq";
 import Geography from "./pages/geography";
-import Income from "./pages/Income/Income";
+import Expense from "./pages/Expense/Expense";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -33,7 +32,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/team" element={<Team />} />
-                <Route path="/contacts" element={<Contacts />} />
+                <Route path="/expense" element={<Expense />} />
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/form" element={<Form />} />
                 <Route path="/bar" element={<Bar />} />
@@ -42,7 +41,7 @@ const App = () => {
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/geography" element={<Geography />} />
-                <Route path="/income" element={<Income />} />
+                {/* <Route path="/income" element={<Income />} /> */}
               </Routes>
             </main>
           </div>

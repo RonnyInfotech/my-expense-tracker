@@ -118,7 +118,7 @@ const MyProSidebar = () => {
             />
             <Item
               title="Expense"
-              to="/contacts"
+              to="/expense"
               icon={<i className="fa fa-inr" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
