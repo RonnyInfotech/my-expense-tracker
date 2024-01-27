@@ -78,5 +78,5 @@ body,
 
 .main {
   display: grid;
-  grid-template-columns: auto 3fr;
+  grid-template-columns: auto;
 }

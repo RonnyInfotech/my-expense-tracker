@@ -4,7 +4,6 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { FileUpload } from 'primereact/fileupload';
 import { Rating } from 'primereact/rating';
 import { Toolbar } from 'primereact/toolbar';
 import { InputTextarea } from 'primereact/inputtextarea';
@@ -14,6 +13,8 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
 import { ProductService } from './ProductService';
+import { Calendar } from 'primereact/calendar';
+import { Dropdown } from 'primereact/dropdown';
 
 export default function Income() {
     let emptyProduct = {
@@ -39,6 +40,50 @@ export default function Income() {
     const toast = useRef(null);
     const dt = useRef(null);
 
+    const [datetime12h, setDateTime12h] = useState(null);
+    const [time, setTime] = useState(null);
+
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const category = [
+        { name: 'Rent', code: 'Rent', image: 'rent.png' },
+        { name: 'Food', code: 'Food', image: 'food.png' },
+        { name: 'Bills', code: 'Bills', image: 'bills.png' },
+        { name: 'Utilities', code: 'Utilities', image: 'utilities.png' },
+        { name: 'Transportation', code: 'Transportation', image: 'transport.png' },
+        { name: 'Insurance', code: 'Insurance', image: 'insurance.png' },
+        { name: 'Shopping', code: 'Shopping', image: 'shopping.png' },
+        { name: 'Entertainment', code: 'Entertainment', image: 'entertainment.png' },
+        { name: 'Health Care', code: 'HealthCare', image: 'health.png' },
+        { name: 'Housing', code: 'Housing', image: 'house.png' },
+        { name: 'Taxes', code: 'Taxes', image: 'tax.png' },
+        { name: 'Clothing', code: 'Clothing', image: 'clothing.png' },
+        { name: 'Education', code: 'Education', image: 'education.png' },
+        { name: 'Miscellaneous', code: 'Miscellaneous', image: 'miscellaneous.png' },
+        { name: 'Personal Care', code: 'PersonalCare', image: 'personal.png' },
+    ];
+
+    const selectedCategoryTemplate = (option, props) => {
+        if (option) {
+            return (
+                <div className="flex align-items-center">
+                    <img alt={option.name} src={require(`../../assets/Images/category/${option.image}`)} className={`mr-2 flag flag-${option.code.toLowerCase()}`} style={{ width: '18px' }} />
+                    <div>{option.name}</div>
+                </div>
+            );
+        }
+
+        return <span>{props.placeholder}</span>;
+    };
+
+    const categoryOptionTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <img alt={option.name} src={require(`../../assets/Images/category/${option.image}`)} className={`mr-2 flag flag-${option.code.toLowerCase()}`} style={{ width: '18px' }} />
+                <div>{option.name}</div>
+            </div>
+        );
+    };
+
     useEffect(() => {
         ProductService.getProducts().then((data) => setProducts(data));
     }, []);
@@ -58,15 +103,15 @@ export default function Income() {
         setProductDialog(false);
     };
 
-    const hideDeleteProductDialog = () => {
+    const hideDeleteExpenseDialog = () => {
         setDeleteProductDialog(false);
     };
 
-    const hideDeleteProductsDialog = () => {
+    const hideDeleteExpensesDialog = () => {
         setDeleteProductsDialog(false);
     };
 
-    const saveProduct = () => {
+    const saveExpense = () => {
         setSubmitted(true);
 
         if (product.name.trim()) {
@@ -101,7 +146,7 @@ export default function Income() {
         setDeleteProductDialog(true);
     };
 
-    const deleteProduct = () => {
+    const deleteExpense = () => {
         let _products = products.filter((val) => val.id !== product.id);
 
         setProducts(_products);
@@ -142,7 +187,7 @@ export default function Income() {
         setDeleteProductsDialog(true);
     };
 
-    const deleteSelectedProducts = () => {
+    const deleteSelectedExpenses = () => {
         let _products = products.filter((val) => !selectedProducts.includes(val));
 
         setProducts(_products);
@@ -179,7 +224,7 @@ export default function Income() {
     const leftToolbarTemplate = () => {
         return (
             <div className="flex flex-wrap gap-2">
-                <Button label="New" icon="pi pi-plus" severity="success" onClick={openNew} />
+                <Button label="ADD TRANSACTION" icon="pi pi-plus" severity="success" onClick={openNew} />
                 <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
             </div>
         );
@@ -232,29 +277,29 @@ export default function Income() {
 
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-            <h4 className="m-0">Manage Products</h4>
+            <h4 className="m-0">Manage Expense</h4>
             <span className="p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
             </span>
         </div>
     );
-    const productDialogFooter = (
+    const expenseDialogFooter = (
         <React.Fragment>
-            <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-            <Button label="Save" icon="pi pi-check" onClick={saveProduct} />
+            <Button label="ADD" icon="pi pi-check" onClick={saveExpense} />
+            <Button label="CANCEL" icon="pi pi-times" outlined onClick={hideDialog} />
         </React.Fragment>
     );
     const deleteProductDialogFooter = (
         <React.Fragment>
-            <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteProductDialog} />
-            <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteProduct} />
+            <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpenseDialog} />
+            <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteExpense} />
         </React.Fragment>
     );
     const deleteProductsDialogFooter = (
         <React.Fragment>
-            <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteProductsDialog} />
-            <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
+            <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpensesDialog} />
+            <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedExpenses} />
         </React.Fragment>
     );
 
@@ -269,72 +314,85 @@ export default function Income() {
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}>
                     <Column selectionMode="multiple" exportable={false}></Column>
-                    <Column field="code" header="Code" sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="name" header="Name" sortable style={{ minWidth: '16rem' }}></Column>
+                    <Column field="code" header="Code" sortable></Column>
+                    <Column field="name" header="Name" sortable></Column>
                     <Column field="image" header="Image" body={imageBodyTemplate}></Column>
-                    <Column field="price" header="Price" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
-                    <Column field="category" header="Category" sortable style={{ minWidth: '10rem' }}></Column>
-                    <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
+                    <Column field="price" header="Price" body={priceBodyTemplate} sortable ></Column>
+                    <Column field="category" header="Category" sortable ></Column>
+                    <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable ></Column>
+                    <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable ></Column>
+                    <Column body={actionBodyTemplate} exportable={false} ></Column>
                 </DataTable>
             </div>
 
-            <Dialog visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Product Details" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
+            <Dialog visible={productDialog} style={{ width: '40rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="New Transaction" modal className="p-fluid" footer={expenseDialogFooter} onHide={hideDialog}>
                 {product.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
                 <div className="field">
-                    <label htmlFor="name" className="font-bold">
-                        Name
-                    </label>
-                    <InputText id="name" value={product.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })} />
-                    {submitted && !product.name && <small className="p-error">Name is required.</small>}
+                    <label htmlFor="Descriptions">Descriptions</label>
+                    <InputTextarea
+                        autoFocus
+                        id="Descriptions"
+                        value={product.description}
+                        onChange={(e) => onInputChange(e, 'description')}
+                        required
+                        rows={3}
+                        cols={20}
+                    />
                 </div>
-                <div className="field">
-                    <label htmlFor="description" className="font-bold">
-                        Description
-                    </label>
-                    <InputTextarea id="description" value={product.description} onChange={(e) => onInputChange(e, 'description')} required rows={3} cols={20} />
+                <div className='formgrid grid'>
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="ChooseDate">Choose a Date</label>
+                        <Calendar
+                            id="ChooseDate"
+                            value={datetime12h}
+                            onChange={(e) => setDateTime12h(e.value)}
+                        />
+                    </div>
+
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="ChooseTime">Choose a Time</label>
+                        <Calendar
+                            id="ChooseTime"
+                            value={time}
+                            onChange={(e) => setTime(e.value)}
+                            timeOnly
+                            hourFormat="12"
+                        />
+                    </div>
                 </div>
 
                 <div className="field">
-                    <label className="mb-3 font-bold">Category</label>
+                    <label className="mb-3">Payment Mode</label>
                     <div className="formgrid grid">
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category1" name="category" value="Accessories" onChange={onCategoryChange} checked={product.category === 'Accessories'} />
-                            <label htmlFor="category1">Accessories</label>
+                        <div className="field-radiobutton col-4">
+                            <RadioButton inputId="Cash" name="PaymentMode" value="Cash" onChange={onCategoryChange} checked={product.category === 'Cash'} />
+                            <label htmlFor="Cash">Cash</label>
                         </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category2" name="category" value="Clothing" onChange={onCategoryChange} checked={product.category === 'Clothing'} />
-                            <label htmlFor="category2">Clothing</label>
+                        <div className="field-radiobutton col-4">
+                            <RadioButton inputId="DebitCard" name="PaymentMode" value="DebitCard" onChange={onCategoryChange} checked={product.category === 'DebitCard'} />
+                            <label htmlFor="DebitCard">Debit Card</label>
                         </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category3" name="category" value="Electronics" onChange={onCategoryChange} checked={product.category === 'Electronics'} />
-                            <label htmlFor="category3">Electronics</label>
-                        </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category4" name="category" value="Fitness" onChange={onCategoryChange} checked={product.category === 'Fitness'} />
-                            <label htmlFor="category4">Fitness</label>
+                        <div className="field-radiobutton col-4">
+                            <RadioButton inputId="CreditCard" name="PaymentMode" value="CreditCard" onChange={onCategoryChange} checked={product.category === 'CreditCard'} />
+                            <label htmlFor="CreditCard">Credit Card</label>
                         </div>
                     </div>
                 </div>
 
                 <div className="formgrid grid">
-                    <div className="field col">
-                        <label htmlFor="price" className="font-bold">
-                            Price
-                        </label>
-                        <InputNumber id="price" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="SelectCategory">Select a Category</label>
+                        <Dropdown value={selectedCategory} onChange={(e) => setSelectedCategory(e.value)} options={category} optionLabel="name" placeholder="Select a Category"
+                            filter valueTemplate={selectedCategoryTemplate} itemTemplate={categoryOptionTemplate} showClear />
                     </div>
-                    <div className="field col">
-                        <label htmlFor="quantity" className="font-bold">
-                            Quantity
-                        </label>
-                        <InputNumber id="quantity" value={product.quantity} onValueChange={(e) => onInputNumberChange(e, 'quantity')} />
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="EnterAmount">Enter a Amount</label>
+                        <InputNumber id="EnterAmount" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="INR" locale="en-US" />
                     </div>
                 </div>
             </Dialog>
 
-            <Dialog visible={deleteProductDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
+            <Dialog visible={deleteProductDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteExpenseDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                     {product && (
@@ -345,12 +403,12 @@ export default function Income() {
                 </div>
             </Dialog>
 
-            <Dialog visible={deleteProductsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteProductsDialog}>
+            <Dialog visible={deleteProductsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteExpensesDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                     {product && <span>Are you sure you want to delete the selected products?</span>}
                 </div>
             </Dialog>
-        </div>
+        </div >
     );
 }

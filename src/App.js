@@ -18,7 +18,7 @@ import Line from "./pages/line";
 import Pie from "./pages/pie";
 import FAQ from "./pages/faq";
 import Geography from "./pages/geography";
-import Income from "./pages/income";
+import Income from "./pages/Income/Income";
 
 const App = () => {
   const [theme, colorMode] = useMode();
