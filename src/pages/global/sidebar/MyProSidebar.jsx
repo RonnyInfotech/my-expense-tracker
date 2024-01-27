@@ -111,7 +111,7 @@ const MyProSidebar = () => {
             </h5>
             <Item
               title="Income"
-              to="/team"
+              to="/income"
               icon={<i className="fa fa-inr" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
@@ -125,7 +125,7 @@ const MyProSidebar = () => {
             />
             <Item
               title="All Transactions"
-              to="/invoices"
+              to="/allTransactions"
               icon={<i className="fa fa-list-alt" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}

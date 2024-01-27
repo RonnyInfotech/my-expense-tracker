@@ -8,8 +8,6 @@ import "../node_modules/primeflex/primeflex.css";
 import "../node_modules/primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 import Dashboard from "./pages/dashboard";
-import Team from "./pages/team";
-import Invoices from "./pages/invoices";
 import Form from "./pages/form";
 import Calendar from "./pages/calendar";
 import Bar from "./pages/bar";
@@ -18,6 +16,8 @@ import Pie from "./pages/pie";
 import FAQ from "./pages/faq";
 import Geography from "./pages/geography";
 import Expense from "./pages/Expense/Expense";
+import Income from "./pages/Income/Income";
+import AllTransactions from "./pages/AllTransactions/AllTransactions";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -31,9 +31,9 @@ const App = () => {
               <Topbar />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/team" element={<Team />} />
+                <Route path="/income" element={<Income />} />
                 <Route path="/expense" element={<Expense />} />
-                <Route path="/invoices" element={<Invoices />} />
+                <Route path="/allTransactions" element={<AllTransactions />} />
                 <Route path="/form" element={<Form />} />
                 <Route path="/bar" element={<Bar />} />
                 <Route path="/pie" element={<Pie />} />
@@ -41,7 +41,6 @@ const App = () => {
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/geography" element={<Geography />} />
-                {/* <Route path="/income" element={<Income />} /> */}
               </Routes>
             </main>
           </div>

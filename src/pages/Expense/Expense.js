@@ -14,8 +14,8 @@ import { Tag } from 'primereact/tag';
 import { ProductService } from './ProductService';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
-import './Expense.css';
 import { DataTable } from 'primereact/datatable';
+import './Expense.css';
 
 const Expense = () => {
   let emptyProduct = {
@@ -285,18 +285,21 @@ const Expense = () => {
       </span>
     </div>
   );
+
   const expenseDialogFooter = (
     <React.Fragment>
       <Button label="ADD" icon="pi pi-check" onClick={saveExpense} />
       <Button label="CANCEL" icon="pi pi-times" outlined onClick={hideDialog} />
     </React.Fragment>
   );
+
   const deleteExpenseDialogFooter = (
     <React.Fragment>
       <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpenseDialog} />
       <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteExpense} />
     </React.Fragment>
   );
+
   const deleteExpensesDialogFooter = (
     <React.Fragment>
       <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpensesDialog} />
@@ -308,7 +311,7 @@ const Expense = () => {
     <div style={{ margin: '20px' }}>
       <Toast ref={toast} />
       <div className="flex justify-content-between align-items-center">
-        <Header title="EXPENSE" subtitle="welcome to you Expense" />
+        <Header title="EXPENSE" subtitle="Manage Expense" />
       </div>
 
       <div className="card">
