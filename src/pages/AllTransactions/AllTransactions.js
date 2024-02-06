@@ -86,7 +86,7 @@ const AllTransactions = () => {
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} incomes" globalFilter={globalFilter} header={header}>
           <Column field="category" header="Category" sortable ></Column>
           <Column field="name" header="Date" sortable></Column>
-          <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column>
+          {/* <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column> */}
           <Column field="code" header="Description" sortable></Column>
           <Column field="price" header="Amount" body={priceBodyTemplate} sortable ></Column>
           <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable ></Column>

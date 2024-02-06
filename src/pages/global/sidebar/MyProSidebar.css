@@ -58,3 +58,21 @@
     font-weight: 500;
     font-size: 13px;
 }
+
+.wallet-container {
+    text-align: center;
+    align-items: center;
+    display: flex;
+    background: #f9f9f9;
+    margin: 0 32px;
+    height: 34px;
+    border: 1px solid #d1d1d1;
+    border-radius: 4px;
+    justify-content: center;
+}
+
+.current-balance {
+    font-size: 15px;
+    font-family: verdana;
+    /* letter-spacing: normal; */
+}

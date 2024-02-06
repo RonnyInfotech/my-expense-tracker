@@ -92,9 +92,11 @@ const MyProSidebar = () => {
                 />
               </div>
               <div style={{ textAlign: 'center' }}>
-                <h2>
-                  Bhautik Ladva
-                </h2>
+                <h2>Bhautik Ladva</h2>
+                <div className='wallet-container'>
+                  <span style={{ height: '27px' }}><img src={require('../../../assets/Images/cash-wallet.png')} alt="Cash Wallet" style={{ width: '23px' }} /></span>
+                  <span className="current-balance ml-2">₹ 12,2000/-</span>
+                </div>
               </div>
             </div>
           }

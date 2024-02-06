@@ -79,7 +79,7 @@ const Income = () => {
   }, []);
 
   const formatCurrency = (value) => {
-    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return value.toLocaleString('en-US', { style: 'currency', currency: 'INR' });
   };
 
   const openNew = () => {
@@ -229,7 +229,7 @@ const Income = () => {
   };
 
   const priceBodyTemplate = (rowData) => {
-    return formatCurrency(rowData.price);
+    return <div style={{ color: 'green' }}>{formatCurrency(rowData.price)}</div>
   };
 
   const ratingBodyTemplate = (rowData) => {
@@ -310,10 +310,10 @@ const Income = () => {
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} incomes" globalFilter={globalFilter} header={header}>
           <Column selectionMode="multiple" exportable={false}></Column>
-          <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column>
+          {/* <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column> */}
           <Column field="category" header="Category" sortable ></Column>
           <Column field="name" header="Date" sortable></Column>
-          <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column>
+          {/* <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column> */}
           <Column field="code" header="Description" sortable></Column>
           <Column field="price" header="Amount" body={priceBodyTemplate} sortable ></Column>
           <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable ></Column>

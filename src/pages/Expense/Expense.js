@@ -90,7 +90,7 @@ const Expense = () => {
   }, []);
 
   const formatCurrency = (value) => {
-    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return value.toLocaleString('en-US', { style: 'currency', currency: 'INR' });
   };
 
   const openNew = () => {
@@ -225,14 +225,14 @@ const Expense = () => {
   const leftToolbarTemplate = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button label="ADD TRANSACTION" icon="pi pi-plus" severity="success" onClick={openNew} />
-        <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedExpenses || !selectedExpenses.length} />
+        <Button size="small" label="ADD TRANSACTION" icon="pi pi-plus" severity="success" onClick={openNew} />
+        <Button size="small" label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedExpenses || !selectedExpenses.length} />
       </div>
     );
   };
 
   const rightToolbarTemplate = () => {
-    return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+    return <Button size="small" label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
   };
 
   const imageBodyTemplate = (rowData) => {
@@ -240,7 +240,7 @@ const Expense = () => {
   };
 
   const priceBodyTemplate = (rowData) => {
-    return formatCurrency(rowData.price);
+    return <div style={{ color: 'red' }}>{formatCurrency(rowData.price)}</div>
   };
 
   const ratingBodyTemplate = (rowData) => {
@@ -254,8 +254,8 @@ const Expense = () => {
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
-        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editProduct(rowData)} />
-        <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
+        <Button size="small" icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editProduct(rowData)} />
+        <Button size="small" icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
       </React.Fragment>
     );
   };
@@ -288,44 +288,44 @@ const Expense = () => {
 
   const expenseDialogFooter = (
     <React.Fragment>
-      <Button label="ADD" icon="pi pi-check" onClick={saveExpense} />
-      <Button label="CANCEL" icon="pi pi-times" outlined onClick={hideDialog} />
+      <Button size="small" label="ADD" icon="pi pi-check" onClick={saveExpense} />
+      <Button size="small" label="CANCEL" icon="pi pi-times" outlined onClick={hideDialog} />
     </React.Fragment>
   );
 
   const deleteExpenseDialogFooter = (
     <React.Fragment>
-      <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpenseDialog} />
-      <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteExpense} />
+      <Button size="small" label="No" icon="pi pi-times" outlined onClick={hideDeleteExpenseDialog} />
+      <Button size="small" label="Yes" icon="pi pi-check" severity="danger" onClick={deleteExpense} />
     </React.Fragment>
   );
 
   const deleteExpensesDialogFooter = (
     <React.Fragment>
-      <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpensesDialog} />
-      <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedExpenses} />
+      <Button size="small" label="No" icon="pi pi-times" outlined onClick={hideDeleteExpensesDialog} />
+      <Button size="small" label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedExpenses} />
     </React.Fragment>
   );
 
   return (
     <div style={{ margin: '20px' }}>
       <Toast ref={toast} />
-      <div className="flex justify-content-between align-items-center">
+      {/* <div className="flex justify-content-between align-items-center">
         <Header title="EXPENSE" subtitle="Manage Expense" />
-      </div>
+      </div> */}
 
       <div className="card">
         <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-        <DataTable size='small' ref={dt} value={expenses} selection={selectedExpenses} onSelectionChange={(e) => setSelectedExpenses(e.value)}
+        <DataTable scrollHeight='66vh' scrollable size='small' ref={dt} value={expenses} selection={selectedExpenses} onSelectionChange={(e) => setSelectedExpenses(e.value)}
           dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} expenses" globalFilter={globalFilter} header={header}>
           <Column selectionMode="multiple" exportable={false}></Column>
-          <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column>
+          {/* <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column> */}
           <Column field="category" header="Category" sortable ></Column>
           <Column field="name" header="Date" sortable></Column>
-          <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column>
-          <Column field="code" header="Description" sortable></Column>
+          {/* <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column> */}
+          <Column field="code" header="Description" sortable filter></Column>
           <Column field="price" header="Amount" body={priceBodyTemplate} sortable ></Column>
           <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable ></Column>
           <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable ></Column>
@@ -389,12 +389,12 @@ const Expense = () => {
         <div className="formgrid grid">
           <div className="field col-12 md:col-6">
             <label htmlFor="SelectCategory">Select a Category</label>
-            <Dropdown value={selectedCategory} onChange={(e) => setSelectedCategory(e.value)} options={category} optionLabel="name" placeholder="Select a Category"
-              filter valueTemplate={selectedCategoryTemplate} itemTemplate={categoryOptionTemplate} showClear />
+            <Dropdown className="p-inputtext-sm" value={selectedCategory} onChange={(e) => setSelectedCategory(e.value)} options={category} optionLabel="name" placeholder="Select a Category"
+              valueTemplate={selectedCategoryTemplate} itemTemplate={categoryOptionTemplate} showClear />
           </div>
           <div className="field col-12 md:col-6">
             <label htmlFor="EnterAmount">Enter a Amount</label>
-            <InputNumber id="EnterAmount" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="INR" locale="en-US" />
+            <InputNumber className="p-inputtext-sm" id="EnterAmount" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="INR" locale="en-US" />
           </div>
         </div>
       </Dialog>
