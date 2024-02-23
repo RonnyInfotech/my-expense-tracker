@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { useTheme } from "@mui/material";
 import ProgressCircle from "../ProgressCircle";
 import { tokens } from "../../theme";
 import './StatBox.css';

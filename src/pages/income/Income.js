@@ -3,54 +3,58 @@ import Header from "../../components/Header/Header";
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { Rating } from 'primereact/rating';
 import { Toolbar } from 'primereact/toolbar';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { RadioButton } from 'primereact/radiobutton';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { Tag } from 'primereact/tag';
 import { ProductService } from './ProductService';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { DataTable } from 'primereact/datatable';
+import { income } from '../../Models/income';
+import { classNames } from 'primereact/utils';
+import { FileUpload } from 'primereact/fileupload';
+import { addItem, getAllItems, updateItem } from '../../services/firebaseService';
+import { LISTS, category } from '../../common/constants';
+import { format } from "date-fns";
 import './Income.css';
 
 const Income = () => {
-  let emptyProduct = {
-    id: null,
-    name: '',
-    image: null,
-    description: '',
-    category: null,
-    price: 0,
-    quantity: 0,
-    rating: 0,
-    inventoryStatus: 'INSTOCK'
-  };
+  const initialState = new income();
+  // format(new Date(yesterday), 'dd/MM/yyyy');
+  const [state, setState] = useState(initialState);
+  const {
+    Id,
+    Description,
+    Date,
+    Time,
+    PaymentMode,
+    Category,
+    Amount,
+    Files,
+  } = state;
 
   const [incomes, setIncomes] = useState(null);
+  // const [item, setItem] = useState(null);
   const [incomeDialog, setIncomeDialog] = useState(false);
   const [deleteIncomeDialog, setDeleteIncomeDialog] = useState(false);
   const [deleteIncomesDialog, setDeleteIncomesDialog] = useState(false);
-  const [product, setProduct] = useState(emptyProduct);
   const [selectedIncomes, setSelectedIncomes] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [percent, setPercent] = useState(0);
+  const [files, setFiles] = useState([]);
   const toast = useRef(null);
   const dt = useRef(null);
 
-  const [datetime12h, setDateTime12h] = useState(null);
-  const [time, setTime] = useState(null);
-
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const category = [
-    { name: 'Salary', code: 'Salary', image: 'salary.png' },
-    { name: 'Interests', code: 'Interests', image: 'interest.png' },
-    { name: 'Business', code: 'Business', image: 'business.png' },
-    { name: 'Extra income', code: 'ExtraIncome', image: 'extra.png' },
-  ];
+  // const category = [
+  //   { name: 'Salary', code: 'Salary', image: 'salary.png' },
+  //   { name: 'Interests', code: 'Interests', image: 'interest.png' },
+  //   { name: 'Business', code: 'Business', image: 'business.png' },
+  //   { name: 'Extra income', code: 'ExtraIncome', image: 'extra.png' },
+  // ];
 
   const selectedCategoryTemplate = (option, props) => {
     if (option) {
@@ -83,7 +87,7 @@ const Income = () => {
   };
 
   const openNew = () => {
-    setProduct(emptyProduct);
+    // setProduct(emptyProduct);
     setSubmitted(false);
     setIncomeDialog(true);
   };
@@ -101,47 +105,60 @@ const Income = () => {
     setDeleteIncomesDialog(false);
   };
 
-  const saveIncome = () => {
-    setSubmitted(true);
+  const showSuccessToast = (message) => {
+    toast.current.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
+  };
 
-    if (product.name.trim()) {
-      let _products = [...incomes];
-      let _product = { ...product };
+  const showErrorToast = (message) => {
+    toast.current.show({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+  };
 
-      if (product.id) {
-        const index = findIndexById(product.id);
+  const showWarningToast = (message) => {
+    toast.current.show({ severity: 'success', summary: 'Warning', detail: message, life: 3000 });
+  };
 
-        _products[index] = _product;
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+  const fetchAllItems = async () => {
+    const result = await getAllItems(LISTS.TRANSACTIONS.NAME);
+    console.log("result..", result)
+  }
+
+  useEffect(() => {
+    fetchAllItems();
+  }, []);
+
+  const saveIncome = async () => {
+    if (!Description.trim().length || !Date || !Time || !PaymentMode || !Category || !Amount) {
+      setSubmitted(true);
+      showErrorToast('Please fill required fields.')
+    } else {
+      if (Id) {
+        const result = updateItem(LISTS.TRANSACTIONS.NAME, 1, state);
+        showSuccessToast('Income updated successfully');
       } else {
-        _product.id = createId();
-        _product.image = 'product-placeholder.svg';
-        _products.push(_product);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
+        const id = await addItem(LISTS.TRANSACTIONS.NAME, state);
+        console.log("result..ID", id);
+        showSuccessToast('Income added successfully');
       }
-
-      setIncomes(_products);
       setIncomeDialog(false);
-      setProduct(emptyProduct);
     }
   };
 
   const editIncome = (product) => {
-    setProduct({ ...product });
+    // setProduct({ ...product });
     setIncomeDialog(true);
   };
 
   const confirmDeleteIncome = (product) => {
-    setProduct(product);
+    // setProduct(product);
     setDeleteIncomeDialog(true);
   };
 
   const deleteIncome = () => {
-    let _products = incomes.filter((val) => val.id !== product.id);
+    // let _products = incomes.filter((val) => val.id !== product.id);
 
-    setIncomes(_products);
+    setIncomes([]);
     setDeleteIncomeDialog(false);
-    setProduct(emptyProduct);
+    // setProduct(emptyProduct);
     toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
   };
 
@@ -186,31 +203,6 @@ const Income = () => {
     toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
   };
 
-  const onCategoryChange = (e) => {
-    let _product = { ...product };
-
-    _product['category'] = e.value;
-    setProduct(_product);
-  };
-
-  const onInputChange = (e, name) => {
-    const val = (e.target && e.target.value) || '';
-    let _product = { ...product };
-
-    _product[`${name}`] = val;
-
-    setProduct(_product);
-  };
-
-  const onInputNumberChange = (e, name) => {
-    const val = e.value || 0;
-    let _product = { ...product };
-
-    _product[`${name}`] = val;
-
-    setProduct(_product);
-  };
-
   const leftToolbarTemplate = () => {
     return (
       <div className="flex flex-wrap gap-2">
@@ -224,20 +216,8 @@ const Income = () => {
     return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
   };
 
-  const imageBodyTemplate = (rowData) => {
-    return <img src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
-  };
-
   const priceBodyTemplate = (rowData) => {
     return <div style={{ color: 'green' }}>{formatCurrency(rowData.price)}</div>
-  };
-
-  const ratingBodyTemplate = (rowData) => {
-    return <Rating value={rowData.rating} readOnly cancel={false} />;
-  };
-
-  const statusBodyTemplate = (rowData) => {
-    return <Tag value={rowData.inventoryStatus} severity={getSeverity(rowData)}></Tag>;
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -249,21 +229,15 @@ const Income = () => {
     );
   };
 
-  const getSeverity = (product) => {
-    switch (product.inventoryStatus) {
-      case 'INSTOCK':
-        return 'success';
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setState({
+      ...state,
+      [name]: value
+    });
+  }
 
-      case 'LOWSTOCK':
-        return 'warning';
-
-      case 'OUTOFSTOCK':
-        return 'danger';
-
-      default:
-        return null;
-    }
-  };
+  console.log("state>>>>>>>>>", state);
 
   const header = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
@@ -316,44 +290,52 @@ const Income = () => {
           {/* <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column> */}
           <Column field="code" header="Description" sortable></Column>
           <Column field="price" header="Amount" body={priceBodyTemplate} sortable ></Column>
-          <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable ></Column>
-          <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable ></Column>
+          <Column field="rating" header="Reviews" sortable ></Column>
+          {/* <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable ></Column> */}
         </DataTable>
       </div>
 
       <Dialog visible={incomeDialog} style={{ width: '40rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="New Transaction" modal className="p-fluid" footer={incomeDialogFooter} onHide={hideDialog}>
-        {product.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
         <div className="field">
           <label htmlFor="Descriptions">Descriptions</label>
           <InputTextarea
+            className={classNames({ 'p-invalid': submitted && !Description?.trim().length })}
             autoFocus
             id="Descriptions"
-            value={product.description}
-            onChange={(e) => onInputChange(e, 'description')}
+            name='Description'
+            value={Description}
+            onChange={handleChange}
             required
             rows={3}
             cols={20}
           />
+          {submitted && !Description?.trim().length && <small className="p-error">Description is Required Field.</small>}
         </div>
         <div className='formgrid grid'>
           <div className="field col-12 md:col-6">
-            <label htmlFor="ChooseDate">Choose a Date</label>
+            <label htmlFor="Date">Choose a Date</label>
             <Calendar
-              id="ChooseDate"
-              value={datetime12h}
-              onChange={(e) => setDateTime12h(e.value)}
+              className={classNames({ 'p-invalid': submitted && !Date })}
+              id="Date"
+              name='Date'
+              value={Date}
+              onChange={handleChange}
             />
+            {submitted && !Date && <small className="p-error">Date is Required Field.</small>}
           </div>
 
           <div className="field col-12 md:col-6">
             <label htmlFor="ChooseTime">Choose a Time</label>
             <Calendar
-              id="ChooseTime"
-              value={time}
-              onChange={(e) => setTime(e.value)}
+              className={classNames({ 'p-invalid': submitted && !Time })}
+              id="Time"
+              name='Time'
+              value={Time}
+              onChange={handleChange}
               timeOnly
               hourFormat="12"
             />
+            {submitted && !Time && <small className="p-error">Time is Required Field.</small>}
           </div>
         </div>
 
@@ -361,16 +343,19 @@ const Income = () => {
           <label className="mb-3">Payment Mode</label>
           <div className="formgrid grid">
             <div className="field-radiobutton col-4">
-              <RadioButton inputId="Cash" name="PaymentMode" value="Cash" onChange={onCategoryChange} checked={product.category === 'Cash'} />
+              <RadioButton className={classNames({ 'p-invalid': submitted && !PaymentMode })} inputId="Cash" name="PaymentMode" value="Cash" onChange={handleChange} checked={PaymentMode === 'Cash'} />
               <label htmlFor="Cash">Cash</label>
             </div>
             <div className="field-radiobutton col-4">
-              <RadioButton inputId="DebitCard" name="PaymentMode" value="DebitCard" onChange={onCategoryChange} checked={product.category === 'DebitCard'} />
+              <RadioButton className={classNames({ 'p-invalid': submitted && !PaymentMode })} inputId="DebitCard" name="PaymentMode" value="DebitCard" onChange={handleChange} checked={PaymentMode === 'DebitCard'} />
               <label htmlFor="DebitCard">Debit Card</label>
             </div>
             <div className="field-radiobutton col-4">
-              <RadioButton inputId="CreditCard" name="PaymentMode" value="CreditCard" onChange={onCategoryChange} checked={product.category === 'CreditCard'} />
+              <RadioButton className={classNames({ 'p-invalid': submitted && !PaymentMode })} inputId="CreditCard" name="PaymentMode" value="CreditCard" onChange={handleChange} checked={PaymentMode === 'CreditCard'} />
               <label htmlFor="CreditCard">Credit Card</label>
+            </div>
+            <div className="field col-12 mb-0">
+              {submitted && !PaymentMode && <small className="p-error">Payment Mode is Required Field.</small>}
             </div>
           </div>
         </div>
@@ -378,22 +363,30 @@ const Income = () => {
         <div className="formgrid grid">
           <div className="field col-12 md:col-6">
             <label htmlFor="SelectCategory">Select a Category</label>
-            <Dropdown value={selectedCategory} onChange={(e) => setSelectedCategory(e.value)} options={category} optionLabel="name" placeholder="Select a Category"
+            <Dropdown className={classNames({ 'p-invalid': submitted && !Category })} name='Category' value={Category} onChange={handleChange} options={category} optionLabel="name" placeholder="Select a Category"
               filter valueTemplate={selectedCategoryTemplate} itemTemplate={categoryOptionTemplate} showClear />
+            {submitted && !Category && <small className="p-error">Category is Required Field.</small>}
           </div>
           <div className="field col-12 md:col-6">
             <label htmlFor="EnterAmount">Enter a Amount</label>
-            <InputNumber id="EnterAmount" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="INR" locale="en-US" />
+            <InputNumber className={classNames({ 'p-invalid': submitted && !Amount })} name='Amount' id="EnterAmount" value={Amount} onValueChange={handleChange} mode="currency" currency="INR" locale="en-US" />
+            {submitted && !Amount && <small className="p-error">Amount is Required Field.</small>}
           </div>
         </div>
+
+        <div className="field">
+          <label htmlFor="EnterAmount">Select File</label>
+          <FileUpload name="documentsToEvidence" auto chooseLabel="Choose" url="/" customUpload uploadHandler={(e) => setFiles(e.files)} onRemove={(e) => setFiles([])} accept="*" emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>} multiple />
+        </div>
+
       </Dialog>
 
       <Dialog visible={deleteIncomeDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteIncomeDialogFooter} onHide={hideDeleteIncomeDialog}>
         <div className="confirmation-content">
           <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-          {product && (
+          {state && (
             <span>
-              Are you sure you want to delete <b>{product.name}</b>?
+              Are you sure you want to delete <b></b>?
             </span>
           )}
         </div>
@@ -402,7 +395,7 @@ const Income = () => {
       <Dialog visible={deleteIncomesDialog} style={{ width: '35rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteIncomesDialogFooter} onHide={hideDeleteIncomesDialog}>
         <div className="confirmation-content">
           <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-          {product && <span>Are you sure you want to delete the selected transaction(s)?</span>}
+          {state && <span>Are you sure you want to delete the selected transaction(s)?</span>}
         </div>
       </Dialog>
     </div>

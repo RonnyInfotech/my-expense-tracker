@@ -17,8 +17,8 @@ const Topbar = () => {
   const { toggleSidebar, broken, rtl } = useProSidebar();
 
   return (
-    <Box display="flex" justifyContent="space-between" p={2}>
-      <Box display="flex">
+    <div className="flex justify-content-between p-3">
+      <div className="flex">
         {broken && !rtl && (
           <IconButton
             sx={{ margin: "0 6 0 2" }}
@@ -27,7 +27,7 @@ const Topbar = () => {
             <MenuOutlinedIcon />
           </IconButton>
         )}
-        <Box
+        {/* <Box
           display="flex"
           backgroundColor={colors.primary[400]}
           p={0.2}
@@ -37,13 +37,13 @@ const Topbar = () => {
           <IconButton type="button">
             <SearchIcon />
           </IconButton>
-        </Box>
-      </Box>
-      <Box display="flex">
+        </Box> */}
+      </div>
+      {/* <Box display="flex">
         <IconButton onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? (
-            
-           <LightModeOutlinedIcon />
+
+            <LightModeOutlinedIcon />
           ) : (
             <DarkModeOutlinedIcon />
           )}
@@ -65,8 +65,8 @@ const Topbar = () => {
             <MenuOutlinedIcon />
           </IconButton>
         )}
-      </Box>
-    </Box>
+      </Box> */}
+    </div>
   );
 };
 

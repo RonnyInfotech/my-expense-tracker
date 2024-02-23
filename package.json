@@ -23,6 +23,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "chart.js": "^4.4.1",
+    "date-fns": "^3.3.1",
     "firebase": "^10.7.2",
     "formik": "^2.2.9",
     "intro.js-react": "^1.0.0",

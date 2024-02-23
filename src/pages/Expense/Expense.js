@@ -15,9 +15,29 @@ import { ProductService } from './ProductService';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { DataTable } from 'primereact/datatable';
+import { FileUpload } from 'primereact/fileupload';
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage"
+import { storage } from '../../services/firebase';
+import { classNames } from 'primereact/utils';
+import { expense } from '../../Models/expenses';
 import './Expense.css';
+import { addItem, updateItem } from '../../services/firebaseService';
+import { LISTS } from '../../common/constants';
 
 const Expense = () => {
+  const initialState = new expense();
+  const [state, setState] = useState(initialState);
+  const {
+    Id,
+    Description,
+    Date,
+    Time,
+    PaymentMode,
+    Category,
+    Amount,
+    Files,
+  } = state;
+
   let emptyProduct = {
     id: null,
     name: '',
@@ -38,13 +58,12 @@ const Expense = () => {
   const [selectedExpenses, setSelectedExpenses] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [percent, setPercent] = useState(0);
+  const [files, setFiles] = useState([]);
+  const [urls, setURLs] = useState([]);
   const toast = useRef(null);
   const dt = useRef(null);
 
-  const [datetime12h, setDateTime12h] = useState(null);
-  const [time, setTime] = useState(null);
-
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const category = [
     { name: 'Rent', code: 'Rent', image: 'rent.png' },
     { name: 'Food', code: 'Food', image: 'food.png' },
@@ -94,7 +113,8 @@ const Expense = () => {
   };
 
   const openNew = () => {
-    setProduct(emptyProduct);
+    // setProduct(emptyProduct);
+    setState(initialState);
     setSubmitted(false);
     setExpenseDialog(true);
   };
@@ -112,30 +132,108 @@ const Expense = () => {
     setDeleteExpensesDialog(false);
   };
 
-  const saveExpense = () => {
-    setSubmitted(true);
-
-    if (product.name.trim()) {
-      let _products = [...expenses];
-      let _product = { ...product };
-
-      if (product.id) {
-        const index = findIndexById(product.id);
-
-        _products[index] = _product;
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
-      } else {
-        _product.id = createId();
-        _product.image = 'product-placeholder.svg';
-        _products.push(_product);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
-      }
-
-      setExpenses(_products);
-      setExpenseDialog(false);
-      setProduct(emptyProduct);
-    }
+  const showSuccessToast = (message) => {
+    toast.current.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
   };
+
+  const showErrorToast = (message) => {
+    toast.current.show({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+  };
+
+  const showWarningToast = (message) => {
+    toast.current.show({ severity: 'success', summary: 'Warning', detail: message, life: 3000 });
+  };
+
+
+
+  const saveExpense = async () => {
+    // if (files.length === 0) {
+    //   alert("Please choose a file first!")
+    // }
+
+    // const storageRef = ref(storage, `/files/${files.name}`)
+    // const uploadTask = uploadBytesResumable(storageRef, files);
+
+    // uploadTask.on(
+    //   "state_changed",
+    //   (snapshot) => {
+    //     const percent = Math.round(
+    //       (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+    //     );
+
+    //     // update progress
+    //     setPercent(percent);
+    //   },
+    //   (err) => console.log(err),
+    //   () => {
+    //     // download url
+    //     getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+    //       console.log(url);
+    //     });
+    //   }
+    // );
+
+    files.map((file) => {
+      console.log('loop');
+
+      const storageRef = ref(storage, `files/${file.name}`);
+
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      // promises.push(uploadTask)
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const prog = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          );
+          setPercent(prog);
+        },
+        (error) => console.log(error),
+        async () => {
+          await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
+            setURLs(prevState => [...prevState, downloadURLs])
+            console.log("File available at", downloadURLs);
+          });
+        }
+      );
+    })
+
+    if (!Description.trim().length || !Date || !Time || !PaymentMode || !Category || !Amount) {
+      setSubmitted(true);
+      showErrorToast('Please fill required fields.')
+    } else {
+      if (Id) {
+        const result = updateItem(LISTS.TRANSACTIONS.NAME, 1, state);
+        showSuccessToast('Expense updated successfully');
+      } else {
+        const result = addItem(LISTS.TRANSACTIONS.NAME, state);
+        showSuccessToast('Expense added successfully');
+      }
+      setExpenseDialog(false);
+    }
+
+    // let _products = [...expenses];
+    // let _product = { ...product };
+
+    // if (product.id) {
+    //   const index = findIndexById(product.id);
+
+    //   _products[index] = _product;
+    //   toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+    // } else {
+    //   _product.id = createId();
+    //   _product.image = 'product-placeholder.svg';
+    //   _products.push(_product);
+    //   toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
+    // }
+
+    // setExpenses(_products);
+    // setExpenseDialog(false);
+    // setProduct(emptyProduct);
+
+  };
+
+  console.log("percent..........", percent);
 
   const editProduct = (product) => {
     setProduct({ ...product });
@@ -235,10 +333,6 @@ const Expense = () => {
     return <Button size="small" label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
   };
 
-  const imageBodyTemplate = (rowData) => {
-    return <img src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
-  };
-
   const priceBodyTemplate = (rowData) => {
     return <div style={{ color: 'red' }}>{formatCurrency(rowData.price)}</div>
   };
@@ -276,6 +370,24 @@ const Expense = () => {
     }
   };
 
+  // console.log("files...", files);
+  // console.log("urls...", urls);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setState({
+      ...state,
+      [name]: value
+    });
+  }
+
+  console.log("state>>>>>>>>>", state);
+
+
+  const onUpload = () => {
+    toast.current.show({ severity: 'info', summary: 'Success', detail: 'File Uploaded' });
+  };
+
   const header = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
       <h4 className="m-0">Manage Expense</h4>
@@ -308,15 +420,15 @@ const Expense = () => {
   );
 
   return (
-    <div style={{ margin: '20px' }}>
+    <div>
       <Toast ref={toast} />
       {/* <div className="flex justify-content-between align-items-center">
         <Header title="EXPENSE" subtitle="Manage Expense" />
       </div> */}
 
-      <div className="card">
-        <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-        <DataTable scrollHeight='66vh' scrollable size='small' ref={dt} value={expenses} selection={selectedExpenses} onSelectionChange={(e) => setSelectedExpenses(e.value)}
+      <div>
+        <Toolbar left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
+        <DataTable scrollHeight='68vh' scrollable size='small' ref={dt} value={expenses} selection={selectedExpenses} onSelectionChange={(e) => setSelectedExpenses(e.value)}
           dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} expenses" globalFilter={globalFilter} header={header}>
@@ -337,34 +449,43 @@ const Expense = () => {
         <div className="field">
           <label htmlFor="Descriptions">Descriptions</label>
           <InputTextarea
+            className={classNames({ 'p-invalid': submitted && !Description?.trim().length })}
             autoFocus
-            id="Descriptions"
-            value={product.description}
-            onChange={(e) => onInputChange(e, 'description')}
+            id="Description"
+            name="Description"
+            value={Description}
+            onChange={handleChange}
             required
             rows={3}
             cols={20}
           />
+          {submitted && !Description?.trim().length && <small className="p-error">Description is Required Field.</small>}
         </div>
         <div className='formgrid grid'>
           <div className="field col-12 md:col-6">
             <label htmlFor="ChooseDate">Choose a Date</label>
             <Calendar
+              className={classNames({ 'p-invalid': submitted && !Date })}
               id="ChooseDate"
-              value={datetime12h}
-              onChange={(e) => setDateTime12h(e.value)}
+              name='Date'
+              value={Date}
+              onChange={handleChange}
             />
+            {submitted && !Date && <small className="p-error">Date is Required Field.</small>}
           </div>
 
           <div className="field col-12 md:col-6">
             <label htmlFor="ChooseTime">Choose a Time</label>
             <Calendar
-              id="ChooseTime"
-              value={time}
-              onChange={(e) => setTime(e.value)}
+              className={classNames({ 'p-invalid': submitted && !Time })}
+              id="Time"
+              value={Time}
+              name='Time'
+              onChange={handleChange}
               timeOnly
               hourFormat="12"
             />
+            {submitted && !Time && <small className="p-error">Time is Required Field.</small>}
           </div>
         </div>
 
@@ -372,31 +493,43 @@ const Expense = () => {
           <label className="mb-3">Payment Mode</label>
           <div className="formgrid grid">
             <div className="field-radiobutton col-4">
-              <RadioButton inputId="Cash" name="PaymentMode" value="Cash" onChange={onCategoryChange} checked={product.category === 'Cash'} />
+              <RadioButton className={classNames({ 'p-invalid': submitted && !PaymentMode })} inputId="Cash" name="PaymentMode" value="Cash" onChange={handleChange} checked={PaymentMode === 'Cash'} />
               <label htmlFor="Cash">Cash</label>
             </div>
             <div className="field-radiobutton col-4">
-              <RadioButton inputId="DebitCard" name="PaymentMode" value="DebitCard" onChange={onCategoryChange} checked={product.category === 'DebitCard'} />
+              <RadioButton className={classNames({ 'p-invalid': submitted && !PaymentMode })} inputId="DebitCard" name="PaymentMode" value="DebitCard" onChange={handleChange} checked={PaymentMode === 'DebitCard'} />
               <label htmlFor="DebitCard">Debit Card</label>
             </div>
             <div className="field-radiobutton col-4">
-              <RadioButton inputId="CreditCard" name="PaymentMode" value="CreditCard" onChange={onCategoryChange} checked={product.category === 'CreditCard'} />
+              <RadioButton className={classNames({ 'p-invalid': submitted && !PaymentMode })} inputId="CreditCard" name='PaymentMode' value="CreditCard" onChange={handleChange} checked={PaymentMode === 'CreditCard'} />
               <label htmlFor="CreditCard">Credit Card</label>
+            </div>
+            <div className="field col-12 mb-0">
+              {submitted && !PaymentMode && <small className="p-error">Payment Mode is Required Field.</small>}
             </div>
           </div>
         </div>
 
+        {/* className="p-inputtext-sm" */}
         <div className="formgrid grid">
           <div className="field col-12 md:col-6">
             <label htmlFor="SelectCategory">Select a Category</label>
-            <Dropdown className="p-inputtext-sm" value={selectedCategory} onChange={(e) => setSelectedCategory(e.value)} options={category} optionLabel="name" placeholder="Select a Category"
+            <Dropdown className={classNames({ 'p-invalid': submitted && !Category })} name='Category' value={Category} onChange={handleChange} options={category} optionLabel="name" placeholder="Select a Category"
               valueTemplate={selectedCategoryTemplate} itemTemplate={categoryOptionTemplate} showClear />
+            {submitted && !Category && <small className="p-error">Category is Required Field.</small>}
           </div>
           <div className="field col-12 md:col-6">
             <label htmlFor="EnterAmount">Enter a Amount</label>
-            <InputNumber className="p-inputtext-sm" id="EnterAmount" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="INR" locale="en-US" />
+            <InputNumber className={classNames({ 'p-invalid': submitted && !Amount })} id="EnterAmount" name='Amount' value={Amount} onValueChange={handleChange} mode="currency" currency="INR" locale="en-IN" />
+            {submitted && !Amount && <small className="p-error">Amount is Required Field.</small>}
           </div>
         </div>
+
+        <div className="field">
+          <label htmlFor="EnterAmount">Select File</label>
+          <FileUpload name="documentsToEvidence" auto chooseLabel="Choose" url="/" customUpload uploadHandler={(e) => setFiles(e.files)} onRemove={(e) => setFiles([])} accept="*" emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>} multiple />
+        </div>
+
       </Dialog>
 
       <Dialog visible={deleteExpenseDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteExpenseDialogFooter} onHide={hideDeleteExpenseDialog}>
