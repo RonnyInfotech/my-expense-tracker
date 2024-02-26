@@ -51,6 +51,7 @@ const MyProSidebar = () => {
   return (
     <div className="side-bar-menu">
       <Sidebar
+        defaultCollapsed={true}
         breakPoint="md"
         rtl={sidebarRTL}
         backgroundColor={colors.primary[400]}

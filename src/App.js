@@ -21,6 +21,7 @@ import Geography from "./pages/geography";
 import Expense from "./pages/Expense/Expense";
 import Income from "./pages/Income/Income";
 import AllTransactions from "./pages/AllTransactions/AllTransactions";
+import ExpenseContextProvider from "./contexts/ExpenseContext";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -28,26 +29,28 @@ const App = () => {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <MyProSidebarProvider>
-          <div style={{ height: "100%", width: "100%" }}>
-            <main>
-              <Topbar />
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/income" element={<Income />} />
-                <Route path="/expense" element={<Expense />} />
-                <Route path="/allTransactions" element={<AllTransactions />} />
-                <Route path="/form" element={<Form />} />
-                <Route path="/bar" element={<Bar />} />
-                <Route path="/pie" element={<Pie />} />
-                <Route path="/line" element={<Line />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/geography" element={<Geography />} />
-              </Routes>
-            </main>
-          </div>
-        </MyProSidebarProvider>
+        <ExpenseContextProvider>
+          <MyProSidebarProvider>
+            <div style={{ height: "100%", width: "100%" }}>
+              <main>
+                <Topbar />
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/income" element={<Income />} />
+                  <Route path="/expense" element={<Expense />} />
+                  <Route path="/allTransactions" element={<AllTransactions />} />
+                  <Route path="/form" element={<Form />} />
+                  <Route path="/bar" element={<Bar />} />
+                  <Route path="/pie" element={<Pie />} />
+                  <Route path="/line" element={<Line />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/geography" element={<Geography />} />
+                </Routes>
+              </main>
+            </div>
+          </MyProSidebarProvider>
+        </ExpenseContextProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

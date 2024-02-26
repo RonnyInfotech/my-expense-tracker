@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Header from "../../components/Header/Header";
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { ExpenseContext } from '../../contexts/ExpenseContext';
+import { addItem, deleteItem, updateItem } from '../../services/firebaseService';
+import { INCOME_CATEGORY, LISTS, category } from '../../common/constants';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
@@ -9,101 +11,32 @@ import { RadioButton } from 'primereact/radiobutton';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { ProductService } from './ProductService';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { DataTable } from 'primereact/datatable';
 import { income } from '../../Models/income';
 import { classNames } from 'primereact/utils';
 import { FileUpload } from 'primereact/fileupload';
-import { addItem, getAllItems, updateItem } from '../../services/firebaseService';
-import { LISTS, category } from '../../common/constants';
-import { format } from "date-fns";
+import Header from "../../components/Header/Header";
+import { updateContext } from '../../common/commonFunction';
+import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
+import { BlockUI } from 'primereact/blockui';
 import './Income.css';
 
 const Income = () => {
   const initialState = new income();
-  // format(new Date(yesterday), 'dd/MM/yyyy');
+  const { incomes, setIncomes, blocked, setBlocked } = useContext(ExpenseContext);
   const [state, setState] = useState(initialState);
-  const {
-    Id,
-    Description,
-    Date,
-    Time,
-    PaymentMode,
-    Category,
-    Amount,
-    Files,
-  } = state;
-
-  const [incomes, setIncomes] = useState(null);
-  // const [item, setItem] = useState(null);
-  const [incomeDialog, setIncomeDialog] = useState(false);
-  const [deleteIncomeDialog, setDeleteIncomeDialog] = useState(false);
+  const { Id, Description, TransactionDate, TransactionTime, PaymentMode, Category, Amount, Files, } = state;
   const [deleteIncomesDialog, setDeleteIncomesDialog] = useState(false);
   const [selectedIncomes, setSelectedIncomes] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [incomeDialog, setIncomeDialog] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
   const [percent, setPercent] = useState(0);
   const [files, setFiles] = useState([]);
   const toast = useRef(null);
   const dt = useRef(null);
-
-  // const category = [
-  //   { name: 'Salary', code: 'Salary', image: 'salary.png' },
-  //   { name: 'Interests', code: 'Interests', image: 'interest.png' },
-  //   { name: 'Business', code: 'Business', image: 'business.png' },
-  //   { name: 'Extra income', code: 'ExtraIncome', image: 'extra.png' },
-  // ];
-
-  const selectedCategoryTemplate = (option, props) => {
-    if (option) {
-      return (
-        <div className="flex align-items-center">
-          <img alt={option.name} src={require(`../../assets/Images/category/${option.image}`)} className={`mr-2 flag flag-${option.code.toLowerCase()}`} style={{ width: '18px' }} />
-          <div>{option.name}</div>
-        </div>
-      );
-    }
-
-    return <span>{props.placeholder}</span>;
-  };
-
-  const categoryOptionTemplate = (option) => {
-    return (
-      <div className="flex align-items-center">
-        <img alt={option.name} src={require(`../../assets/Images/category/${option.image}`)} className={`mr-2 flag flag-${option.code.toLowerCase()}`} style={{ width: '18px' }} />
-        <div>{option.name}</div>
-      </div>
-    );
-  };
-
-  useEffect(() => {
-    ProductService.getProducts().then((data) => setIncomes(data));
-  }, []);
-
-  const formatCurrency = (value) => {
-    return value.toLocaleString('en-US', { style: 'currency', currency: 'INR' });
-  };
-
-  const openNew = () => {
-    // setProduct(emptyProduct);
-    setSubmitted(false);
-    setIncomeDialog(true);
-  };
-
-  const hideDialog = () => {
-    setSubmitted(false);
-    setIncomeDialog(false);
-  };
-
-  const hideDeleteIncomeDialog = () => {
-    setDeleteIncomeDialog(false);
-  };
-
-  const hideDeleteIncomesDialog = () => {
-    setDeleteIncomesDialog(false);
-  };
 
   const showSuccessToast = (message) => {
     toast.current.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
@@ -117,90 +50,106 @@ const Income = () => {
     toast.current.show({ severity: 'success', summary: 'Warning', detail: message, life: 3000 });
   };
 
-  const fetchAllItems = async () => {
-    const result = await getAllItems(LISTS.TRANSACTIONS.NAME);
-    console.log("result..", result)
-  }
-
-  useEffect(() => {
-    fetchAllItems();
-  }, []);
-
-  const saveIncome = async () => {
-    if (!Description.trim().length || !Date || !Time || !PaymentMode || !Category || !Amount) {
-      setSubmitted(true);
-      showErrorToast('Please fill required fields.')
-    } else {
-      if (Id) {
-        const result = updateItem(LISTS.TRANSACTIONS.NAME, 1, state);
-        showSuccessToast('Income updated successfully');
-      } else {
-        const id = await addItem(LISTS.TRANSACTIONS.NAME, state);
-        console.log("result..ID", id);
-        showSuccessToast('Income added successfully');
-      }
-      setIncomeDialog(false);
-    }
+  const exportCSV = () => {
+    dt.current.exportCSV();
   };
 
-  const editIncome = (product) => {
-    // setProduct({ ...product });
+  const selectedCategoryTemplate = (option, props) => {
+    if (option) {
+      return (
+        <div className="flex align-items-center">
+          <img alt={option.name} src={require(`../../assets/Images/category/${option.image}`)} className={`mr-2 flag flag-${option.code.toLowerCase()}`} style={{ width: '18px' }} />
+          <div>{option.name}</div>
+        </div>
+      );
+    }
+    return <span>{props.placeholder}</span>;
+  };
+
+  const categoryOptionTemplate = (option) => {
+    return (
+      <div className="flex align-items-center">
+        <img alt={option.name} src={require(`../../assets/Images/category/${option.image}`)} className={`mr-2 flag flag-${option.code.toLowerCase()}`} style={{ width: '18px' }} />
+        <div>{option.name}</div>
+      </div>
+    );
+  };
+
+  const openNew = () => {
+    // setState(initialState);
+    setSubmitted(false);
     setIncomeDialog(true);
   };
 
-  const confirmDeleteIncome = (product) => {
-    // setProduct(product);
-    setDeleteIncomeDialog(true);
+  const hideDialog = () => {
+    setSubmitted(false);
+    setIncomeDialog(false);
   };
 
-  const deleteIncome = () => {
-    // let _products = incomes.filter((val) => val.id !== product.id);
-
-    setIncomes([]);
-    setDeleteIncomeDialog(false);
-    // setProduct(emptyProduct);
-    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
-  };
-
-  const findIndexById = (id) => {
-    let index = -1;
-
-    for (let i = 0; i < incomes.length; i++) {
-      if (incomes[i].id === id) {
-        index = i;
-        break;
-      }
-    }
-
-    return index;
-  };
-
-  const createId = () => {
-    let id = '';
-    let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    for (let i = 0; i < 5; i++) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    return id;
-  };
-
-  const exportCSV = () => {
-    dt.current.exportCSV();
+  const hideDeleteIncomesDialog = () => {
+    setDeleteIncomesDialog(false);
   };
 
   const confirmDeleteSelected = () => {
     setDeleteIncomesDialog(true);
   };
 
-  const deleteSelectedIncomes = () => {
-    let _products = incomes.filter((val) => !selectedIncomes.includes(val));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setState({
+      ...state,
+      [name]: value
+    });
+  };
 
-    setIncomes(_products);
-    setDeleteIncomesDialog(false);
-    setSelectedIncomes(null);
-    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+  const editIncome = (rowData) => {
+    setState(rowData);
+    setIncomeDialog(true);
+  };
+
+  const saveIncome = async () => {
+    setBlocked(true);
+    if (!Description.trim().length || !TransactionDate || !TransactionTime || !PaymentMode || !Category || !Amount) {
+      setSubmitted(true);
+      setBlocked(false);
+      showErrorToast('Please fill required fields.');
+    } else {
+      if (Id) {
+        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
+          const res = updateContext(incomes, state.Id, state);
+          setIncomes(res);
+          setBlocked(false);
+          showSuccessToast('Income updated successfully');
+        });
+      } else {
+        await addItem(LISTS.TRANSACTIONS.NAME, state).then(() => {
+          incomes.push(state);
+          setBlocked(false);
+          showSuccessToast('Income added successfully');
+        });
+      }
+      setIncomeDialog(false);
+      setBlocked(false);
+    }
+  };
+
+  const deleteSelectedIncomes = async () => {
+    setBlocked(true);
+    if (selectedIncomes.length > 0) {
+      for (const item of selectedIncomes) {
+        await deleteItem(LISTS.TRANSACTIONS.NAME, item.Id).then(() => {
+          let _incomes = incomes.filter((val) => !selectedIncomes.includes(val));
+          setIncomes(_incomes);
+          setDeleteIncomesDialog(false);
+          setSelectedIncomes(null);
+          setBlocked(false);
+        }).catch((err) => {
+          console.log("Err", err);
+          setBlocked(false);
+        });
+      }
+      showSuccessToast('Incomes Deleted successfully');
+    }
   };
 
   const leftToolbarTemplate = () => {
@@ -216,28 +165,52 @@ const Income = () => {
     return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
   };
 
+  const formatCurrency = (value) => {
+    return value.toLocaleString('en-IN', { style: 'currency', maximumFractionDigits: 2, currency: 'INR' });
+  };
+
   const priceBodyTemplate = (rowData) => {
-    return <div style={{ color: 'green' }}>{formatCurrency(rowData.price)}</div>
+    return <div style={{ color: 'green' }}><b>{formatCurrency(rowData.Amount)}</b></div>
   };
 
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
-        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editIncome(rowData)} />
-        <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteIncome(rowData)} />
+        <Button icon="pi pi-pencil" rounded text className="mr-2" onClick={() => editIncome(rowData)} />
       </React.Fragment>
     );
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setState({
-      ...state,
-      [name]: value
-    });
-  }
+  const categoryBodyTemplate = (rowData) => {
+    return (
+      <div className="flex align-items-center">
+        <img alt={rowData.Category.name} src={require(`../../assets/Images/category/${rowData.Category.image}`)} className='mr-2' style={{ width: '23px' }} />
+        <div>{rowData.Category.name}</div>
+      </div>
+    );
+  };
 
-  console.log("state>>>>>>>>>", state);
+  const getPaymentIcon = (rowData) => {
+    switch (rowData.PaymentMode) {
+      case 'Cash':
+        return 'cash.png';
+      case 'DebitCard':
+        return 'debit-card.png';
+      case 'CreditCard':
+        return 'credit-card.png';
+      default:
+        return null;
+    }
+  };
+
+  const paymentModeBodyTemplate = (rowData) => {
+    return (
+      <div className="flex align-items-center" >
+        <img alt={rowData.PaymentMode} src={require(`../../assets/Images/${getPaymentIcon(rowData)}`)} className='mr-2' style={{ width: '2rem' }} />
+        <div>{rowData.PaymentMode}</div>
+      </ div >
+    )
+  };
 
   const header = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
@@ -256,13 +229,6 @@ const Income = () => {
     </React.Fragment>
   );
 
-  const deleteIncomeDialogFooter = (
-    <React.Fragment>
-      <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteIncomeDialog} />
-      <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteIncome} />
-    </React.Fragment>
-  );
-
   const deleteIncomesDialogFooter = (
     <React.Fragment>
       <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteIncomesDialog} />
@@ -273,6 +239,7 @@ const Income = () => {
   return (
     <div style={{ margin: '20px' }}>
       <Toast ref={toast} />
+      <BlockUI blocked={blocked} fullScreen template={<CustomSpinner />} />
       <div className="flex justify-content-between align-items-center">
         <Header title="INCOME" subtitle="Manage Income" />
       </div>
@@ -280,18 +247,18 @@ const Income = () => {
       <div className="card">
         <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
         <DataTable size='small' ref={dt} value={incomes} selection={selectedIncomes} onSelectionChange={(e) => setSelectedIncomes(e.value)}
-          dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+          dataKey="Id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} incomes" globalFilter={globalFilter} header={header}>
           <Column selectionMode="multiple" exportable={false}></Column>
-          {/* <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column> */}
-          <Column field="category" header="Category" sortable ></Column>
-          <Column field="name" header="Date" sortable></Column>
-          {/* <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column> */}
-          <Column field="code" header="Description" sortable></Column>
-          <Column field="price" header="Amount" body={priceBodyTemplate} sortable ></Column>
-          <Column field="rating" header="Reviews" sortable ></Column>
-          {/* <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable ></Column> */}
+          <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column>
+          <Column field="Category" header="Category" body={categoryBodyTemplate} sortable ></Column>
+          <Column field="_Date" header="Date" sortable ></Column>
+          <Column field="_Time" header="Time" sortable ></Column>
+          <Column field="Day" header="Day" sortable ></Column>
+          <Column field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable></Column>
+          <Column field="Description" header="Description" sortable></Column>
+          <Column field="Amount" header="Amount" body={priceBodyTemplate} sortable ></Column>
         </DataTable>
       </div>
 
@@ -313,29 +280,29 @@ const Income = () => {
         </div>
         <div className='formgrid grid'>
           <div className="field col-12 md:col-6">
-            <label htmlFor="Date">Choose a Date</label>
+            <label htmlFor="TransactionDate">Choose a Date</label>
             <Calendar
-              className={classNames({ 'p-invalid': submitted && !Date })}
-              id="Date"
-              name='Date'
-              value={Date}
+              className={classNames({ 'p-invalid': submitted && !TransactionDate })}
+              id="TransactionDate"
+              name='TransactionDate'
+              value={TransactionDate}
               onChange={handleChange}
             />
-            {submitted && !Date && <small className="p-error">Date is Required Field.</small>}
+            {submitted && !TransactionDate && <small className="p-error">Date is Required Field.</small>}
           </div>
 
           <div className="field col-12 md:col-6">
             <label htmlFor="ChooseTime">Choose a Time</label>
             <Calendar
-              className={classNames({ 'p-invalid': submitted && !Time })}
-              id="Time"
-              name='Time'
-              value={Time}
+              className={classNames({ 'p-invalid': submitted && !TransactionTime })}
+              id="TransactionTime"
+              name='TransactionTime'
+              value={TransactionTime}
               onChange={handleChange}
               timeOnly
               hourFormat="12"
             />
-            {submitted && !Time && <small className="p-error">Time is Required Field.</small>}
+            {submitted && !TransactionTime && <small className="p-error">Time is Required Field.</small>}
           </div>
         </div>
 
@@ -363,7 +330,7 @@ const Income = () => {
         <div className="formgrid grid">
           <div className="field col-12 md:col-6">
             <label htmlFor="SelectCategory">Select a Category</label>
-            <Dropdown className={classNames({ 'p-invalid': submitted && !Category })} name='Category' value={Category} onChange={handleChange} options={category} optionLabel="name" placeholder="Select a Category"
+            <Dropdown className={classNames({ 'p-invalid': submitted && !Category })} name='Category' value={Category} onChange={handleChange} options={INCOME_CATEGORY} optionLabel="name" placeholder="Select a Category"
               filter valueTemplate={selectedCategoryTemplate} itemTemplate={categoryOptionTemplate} showClear />
             {submitted && !Category && <small className="p-error">Category is Required Field.</small>}
           </div>
@@ -378,24 +345,12 @@ const Income = () => {
           <label htmlFor="EnterAmount">Select File</label>
           <FileUpload name="documentsToEvidence" auto chooseLabel="Choose" url="/" customUpload uploadHandler={(e) => setFiles(e.files)} onRemove={(e) => setFiles([])} accept="*" emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>} multiple />
         </div>
-
-      </Dialog>
-
-      <Dialog visible={deleteIncomeDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteIncomeDialogFooter} onHide={hideDeleteIncomeDialog}>
-        <div className="confirmation-content">
-          <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-          {state && (
-            <span>
-              Are you sure you want to delete <b></b>?
-            </span>
-          )}
-        </div>
       </Dialog>
 
       <Dialog visible={deleteIncomesDialog} style={{ width: '35rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteIncomesDialogFooter} onHide={hideDeleteIncomesDialog}>
         <div className="confirmation-content">
           <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-          {state && <span>Are you sure you want to delete the selected transaction(s)?</span>}
+          <span>Are you sure you want to delete the selected transaction(s)?</span>
         </div>
       </Dialog>
     </div>
