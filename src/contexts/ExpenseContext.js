@@ -9,7 +9,7 @@ const ExpenseContextProvider = (props) => {
     const [incomes, setIncomes] = useState([]);
     const [expenses, setExpenses] = useState([]);
     const [blocked, setBlocked] = useState(false);
-    const [transaction, setTransaction] = useState([]);
+    const [transactions, setTransactions] = useState([]);
 
     const getTransactionsData = async () => {
         setBlocked(true);
@@ -25,7 +25,7 @@ const ExpenseContextProvider = (props) => {
         if (result.length > 0) {
             setIncomes(result.filter(ele => ele.Cashflow == CASHFLOW.Income));
             setExpenses(result.filter(ele => ele.Cashflow == CASHFLOW.Expense));
-            setTransaction(result || []);
+            setTransactions(result || []);
             setBlocked(false);
         }
         setBlocked(false);
@@ -42,8 +42,8 @@ const ExpenseContextProvider = (props) => {
                 setIncomes,
                 expenses,
                 setExpenses,
-                transaction,
-                setTransaction,
+                transactions,
+                setTransactions,
                 blocked,
                 setBlocked
             }}>

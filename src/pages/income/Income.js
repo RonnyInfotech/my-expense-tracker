@@ -1,27 +1,17 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { ExpenseContext } from '../../contexts/ExpenseContext';
+import {
+  Column, Toast, Button, Toolbar, InputTextarea, RadioButton, InputNumber, Dialog, InputText, Calendar,
+  Dropdown, DataTable, FileUpload, classNames, BlockUI
+} from 'primereact';
 import { addItem, deleteItem, updateItem } from '../../services/firebaseService';
-import { INCOME_CATEGORY, LISTS, category } from '../../common/constants';
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
-import { Button } from 'primereact/button';
-import { Toolbar } from 'primereact/toolbar';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton } from 'primereact/radiobutton';
-import { InputNumber } from 'primereact/inputnumber';
-import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
-import { Calendar } from 'primereact/calendar';
-import { Dropdown } from 'primereact/dropdown';
-import { DataTable } from 'primereact/datatable';
-import { income } from '../../Models/income';
-import { classNames } from 'primereact/utils';
-import { FileUpload } from 'primereact/fileupload';
-import Header from "../../components/Header/Header";
-import { updateContext } from '../../common/commonFunction';
 import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
-import { BlockUI } from 'primereact/blockui';
+import { INCOME_CATEGORY, LISTS } from '../../common/constants';
+import { updateContext } from '../../common/commonFunction';
+import Header from "../../components/Header/Header";
+import { income } from '../../Models/income';
 import './Income.css';
+import { format } from 'date-fns';
 
 const Income = () => {
   const initialState = new income();
@@ -115,6 +105,9 @@ const Income = () => {
       showErrorToast('Please fill required fields.');
     } else {
       if (Id) {
+        delete state['Day'];
+        delete state['_Date'];
+        delete state['_Time'];
         await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
           const res = updateContext(incomes, state.Id, state);
           setIncomes(res);
@@ -123,7 +116,12 @@ const Income = () => {
         });
       } else {
         await addItem(LISTS.TRANSACTIONS.NAME, state).then(() => {
-          incomes.push(state);
+          incomes.push({
+            ...state,
+            Day: format(new Date(state.TransactionDate), 'EEEE'),
+            _Date: format(new Date(state.TransactionDate), 'dd/MM/yyyy'),
+            _Time: format(new Date(state.TransactionTime), 'hh:mm a')
+          });
           setBlocked(false);
           showSuccessToast('Income added successfully');
         });

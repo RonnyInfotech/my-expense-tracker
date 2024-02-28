@@ -1,29 +1,19 @@
 import React, { useState, useRef, useContext } from 'react';
-import Header from "../../components/Header/Header";
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
-import { Button } from 'primereact/button';
-import { Toolbar } from 'primereact/toolbar';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton } from 'primereact/radiobutton';
-import { InputNumber } from 'primereact/inputnumber';
-import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
-import { Calendar } from 'primereact/calendar';
-import { Dropdown } from 'primereact/dropdown';
-import { DataTable } from 'primereact/datatable';
-import { FileUpload } from 'primereact/fileupload';
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage"
 import { storage } from '../../services/firebase';
-import { classNames } from 'primereact/utils';
-import { expense } from '../../Models/expenses';
+import {
+  Column, Toast, Button, Toolbar, InputTextarea, RadioButton, InputNumber, Dialog, InputText, Calendar,
+  Dropdown, DataTable, FileUpload, classNames, BlockUI
+} from 'primereact';
 import { addItem, deleteItem, updateItem } from '../../services/firebaseService';
+import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
 import { EXPENSE_CATEGORY, LISTS } from '../../common/constants';
 import { ExpenseContext } from '../../contexts/ExpenseContext';
-import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
 import { updateContext } from '../../common/commonFunction';
-import { BlockUI } from 'primereact/blockui';
+import Header from "../../components/Header/Header";
+import { expense } from '../../Models/expenses';
 import './Expense.css';
+import { format } from 'date-fns';
 
 const Expense = () => {
   const initialState = new expense();
@@ -168,6 +158,9 @@ const Expense = () => {
       setBlocked(false);
       showErrorToast('Please fill required fields.');
     } else {
+      delete state['Day'];
+      delete state['_Date'];
+      delete state['_Time'];
       if (Id) {
         await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
           const res = updateContext(expenses, state.Id, state);
@@ -177,7 +170,12 @@ const Expense = () => {
         });
       } else {
         await addItem(LISTS.TRANSACTIONS.NAME, state).then(() => {
-          expenses.push(state);
+          expenses.push({
+            ...state,
+            Day: format(new Date(state.TransactionDate), 'EEEE'),
+            _Date: format(new Date(state.TransactionDate), 'dd/MM/yyyy'),
+            _Time: format(new Date(state.TransactionTime), 'hh:mm a')
+          });
           setBlocked(false);
           showSuccessToast('Income added successfully');
         });
@@ -225,7 +223,7 @@ const Expense = () => {
   };
 
   const priceBodyTemplate = (rowData) => {
-    return <div style={{ color: 'red' }}>{formatCurrency(rowData.price)}</div>
+    return <div style={{ color: 'red' }}><b>{formatCurrency(rowData.Amount)}</b></div>
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -295,6 +293,8 @@ const Expense = () => {
       <Button size="small" label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedExpenses} />
     </React.Fragment>
   );
+
+  console.log("expenses..", expenses)
 
   return (
     <div style={{ margin: '20px' }}>

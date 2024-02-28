@@ -1,63 +1,63 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import Header from "../../components/Header/Header";
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { Rating } from 'primereact/rating';
 import { InputText } from 'primereact/inputtext';
-import { Tag } from 'primereact/tag';
-import { ProductService } from './ProductService';
 import { DataTable } from 'primereact/datatable';
+import { ExpenseContext } from '../../contexts/ExpenseContext';
+import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
+import { BlockUI } from 'primereact/blockui';
+import { CASHFLOW } from '../../common/constants';
 
 const AllTransactions = () => {
-  const [incomes, setIncomes] = useState(null);
+  const { transactions, setTransactions, blocked, setBlocked } = useContext(ExpenseContext);
   const [selectedIncomes, setSelectedIncomes] = useState(null);
   const [globalFilter, setGlobalFilter] = useState(null);
   const toast = useRef(null);
   const dt = useRef(null);
 
-  useEffect(() => {
-    ProductService.getProducts().then((data) => setIncomes(data));
-  }, []);
-
   const formatCurrency = (value) => {
-    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+  };
+
+  const priceBodyTemplate = (rowData) => {
+    return <div style={{ color: `${rowData.Cashflow == CASHFLOW.Expense ? 'red' : 'green'}` }}><b>{formatCurrency(rowData.Amount)}</b></div>
   };
 
   const exportCSV = () => {
     dt.current.exportCSV();
   };
 
-  const imageBodyTemplate = (rowData) => {
-    return <img src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
+  const categoryBodyTemplate = (rowData) => {
+    return (
+      <div className="flex align-items-center">
+        <img alt={rowData.Category.name} src={require(`../../assets/Images/category/${rowData.Category.image}`)} className='mr-2' style={{ width: '23px' }} />
+        <div>{rowData.Category.name}</div>
+      </div>
+    );
   };
 
-  const priceBodyTemplate = (rowData) => {
-    return formatCurrency(rowData.price);
-  };
-
-  const ratingBodyTemplate = (rowData) => {
-    return <Rating value={rowData.rating} readOnly cancel={false} />;
-  };
-
-  const statusBodyTemplate = (rowData) => {
-    return <Tag value={rowData.inventoryStatus} severity={getSeverity(rowData)}></Tag>;
-  };
-
-  const getSeverity = (product) => {
-    switch (product.inventoryStatus) {
-      case 'INSTOCK':
-        return 'success';
-
-      case 'LOWSTOCK':
-        return 'warning';
-
-      case 'OUTOFSTOCK':
-        return 'danger';
-
+  const getPaymentIcon = (rowData) => {
+    switch (rowData.PaymentMode) {
+      case 'Cash':
+        return 'cash.png';
+      case 'DebitCard':
+        return 'debit-card.png';
+      case 'CreditCard':
+        return 'credit-card.png';
       default:
         return null;
     }
+  };
+
+  const paymentModeBodyTemplate = (rowData) => {
+    return (
+      <div className="flex align-items-center" >
+        <img alt={rowData.PaymentMode} src={require(`../../assets/Images/${getPaymentIcon(rowData)}`)} className='mr-2' style={{ width: '2rem' }} />
+        <div>{rowData.PaymentMode}</div>
+      </ div >
+    )
   };
 
   const header = (
@@ -76,21 +76,23 @@ const AllTransactions = () => {
   return (
     <div style={{ margin: '20px' }}>
       <Toast ref={toast} />
+      <BlockUI blocked={blocked} fullScreen template={<CustomSpinner />} />
       <div className="flex justify-content-between align-items-center">
         <Header title="All Transactions" subtitle="welcome to you All Transactions" />
       </div>
       <div className="card">
-        <DataTable size='small' ref={dt} value={incomes} selection={selectedIncomes} onSelectionChange={(e) => setSelectedIncomes(e.value)}
-          dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+        <DataTable size='small' ref={dt} value={transactions} selection={selectedIncomes} onSelectionChange={(e) => setSelectedIncomes(e.value)}
+          dataKey="Id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} incomes" globalFilter={globalFilter} header={header}>
-          <Column field="category" header="Category" sortable ></Column>
-          <Column field="name" header="Date" sortable></Column>
-          {/* <Column field="image" header="Payment Mode" body={imageBodyTemplate}></Column> */}
-          <Column field="code" header="Description" sortable></Column>
-          <Column field="price" header="Amount" body={priceBodyTemplate} sortable ></Column>
-          <Column field="rating" header="Reviews" body={ratingBodyTemplate} sortable ></Column>
-          <Column field="inventoryStatus" header="Status" body={statusBodyTemplate} sortable ></Column>
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Transactions" globalFilter={globalFilter} header={header}>
+          <Column selectionMode="multiple" exportable={false}></Column>
+          <Column field="Category" header="Category" body={categoryBodyTemplate} sortable ></Column>
+          <Column field="_Date" header="Date" sortable ></Column>
+          <Column field="_Time" header="Time" sortable ></Column>
+          <Column field="Day" header="Day" sortable ></Column>
+          <Column field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable></Column>
+          <Column field="Description" header="Description" sortable></Column>
+          <Column field="Amount" header="Amount" body={priceBodyTemplate} sortable ></Column>
         </DataTable>
       </div>
     </div>
