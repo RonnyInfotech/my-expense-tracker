@@ -51,6 +51,7 @@ const MyProSidebar = () => {
   return (
     <div className="side-bar-menu">
       <Sidebar
+        // defaultCollapsed={true}
         breakPoint="md"
         rtl={sidebarRTL}
         backgroundColor={colors.primary[400]}
@@ -60,13 +61,10 @@ const MyProSidebar = () => {
         <Menu iconshape="square">
           <MenuItem
             icon={
-              collapsed ? (
-                // <MenuOutlinedIcon onClick={() => collapseSidebar()} />
-                <i className="pi pi-bars" onClick={() => collapseSidebar()} />
-
-              ) : sidebarRTL ?
-                <i className="pi pi-caret-left" onClick={() => setSidebarRTL(!sidebarRTL)} /> :
-                <i className="pi pi-caret-right" onClick={() => setSidebarRTL(!sidebarRTL)} />
+              collapsed ? <i className="pi pi-bars" onClick={() => collapseSidebar()} />
+                : sidebarRTL ?
+                  <i className="pi pi-caret-left" onClick={() => setSidebarRTL(!sidebarRTL)} /> :
+                  <i className="pi pi-caret-right" onClick={() => setSidebarRTL(!sidebarRTL)} />
             }
             style={{
               margin: "10px 0 20px 0",
@@ -78,127 +76,91 @@ const MyProSidebar = () => {
                 <h3>
                   EXPENSE
                 </h3>
-
-                <i className="pi pi-times" onClick={
-                  broken ? () => toggleSidebar() : () => collapseSidebar()
-                } />
-                {/* <IconButton
-                  onClick={
-                    broken ? () => toggleSidebar() : () => collapseSidebar()
-                  }
-                >
-                  <CloseOutlinedIcon />
-                </IconButton> */}
+                <i className="pi pi-times" onClick={broken ? () => toggleSidebar() : () => collapseSidebar()} />
               </div>
             )}
           </MenuItem>
-          {!collapsed && (
-            <Box mb="25px">
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                sx={{
-                  "& .avater-image": {
-                    backgroundColor: colors.primary[500],
-                  },
-                }}
-              >
+          {!collapsed &&
+            <div style={{ marginBottom: '25px' }}>
+              <div className="user-image-wrapper">
                 <img
-                  className="avater-image"
+                  className="avatar-image"
                   alt="profile user"
                   width="100px"
                   height="100px"
                   src={"../../assets/user.png"}
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
-              </Box>
-              <Box textAlign="center">
-                <Typography
-                  variant="h3"
-                  color={colors.grey[100]}
-                  fontWeight="bold"
-                  sx={{ m: "10px 0 0 0" }}
-                >
-                  Bhautik Ladva
-                </Typography>
-              </Box>
-            </Box>
-          )}
-          <Box paddingLeft={collapsed ? undefined : "10%"}>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <h2>Bhautik Ladva</h2>
+                <div className='wallet-container'>
+                  <span style={{ height: '27px' }}><img src={require('../../../assets/Images/cash-wallet.png')} alt="Cash Wallet" style={{ width: '23px' }} /></span>
+                  <span className="current-balance ml-2">₹ 12,2000/-</span>
+                </div>
+              </div>
+            </div>
+          }
+          <div style={{ paddingLeft: collapsed ? undefined : '10%' }}>
             <Item
               title="Dashboard"
               to="/"
-              icon={<HomeOutlinedIcon />}
+              icon={<i className="pi pi-home" />}
               selected={selected}
               setSelected={setSelected}
             />
-
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 20px 5px 20px" }}
-            >
+            <h5 className="menu-header">
               Transactions
-            </Typography>
+            </h5>
             <Item
               title="Income"
-              to="/team"
-              icon={<PeopleOutlinedIcon />}
+              to="/income"
+              icon={<i className="fa fa-inr" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="Expense"
-              to="/contacts"
-              icon={<ContactsOutlinedIcon />}
+              to="/expense"
+              icon={<i className="fa fa-inr" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="All Transactions"
-              to="/invoices"
-              icon={<ReceiptOutlinedIcon />}
+              to="/allTransactions"
+              icon={<i className="fa fa-list-alt" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
 
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 20px 5px 20px" }}
-            >
+            <h5 className="menu-header">
               Admin
-            </Typography>
+            </h5>
             <Item
               title="Categories"
               to="/form"
-              icon={<PersonOutlinedIcon />}
+              icon={<i className="fa fa-archive" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="Report"
               to="/calendar"
-              icon={<CalendarTodayOutlinedIcon />}
+              icon={<i className="fa fa-calendar-o" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="FAQ Page"
               to="/faq"
-              icon={<HelpOutlineOutlinedIcon />}
+              icon={<i className="fa fa-question-circle-o" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
             />
-
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 20px 5px 20px" }}
-            >
+            <h6 className="menu-header">
               Charts
-            </Typography>
+            </h6>
             <Item
               title="Bar Chart"
               to="/bar"
@@ -227,7 +189,7 @@ const MyProSidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-          </Box>
+          </div>
         </Menu>
       </Sidebar>
     </div>

@@ -1,0 +1,19 @@
+.header-title {
+    color: #e0e0e0;
+    margin-bottom: 5px;
+    font-size: 32px;
+    font-weight: 700;
+    font-family: "Source Sans Pro", sans-serif;
+    line-height: 1.2;
+}
+
+.header-sub-title {
+    color: #4cceac;
+    font-size: 1rem;
+    margin: 0px;
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.334;
+    color: rgb(112, 216, 189);
+}
