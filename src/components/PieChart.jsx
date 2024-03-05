@@ -4,36 +4,36 @@ import { useTheme } from '@mui/material';
 import { tokens } from '../theme';
 import { mockPieData } from '../data/mockData';
 
-const PieChart = ({isDashboard=false}) => {
+const PieChart = ({ isDashboard = false }) => {
     const theme = useTheme()
     const colors = tokens(theme.palette.mode)
     return (
         <ResponsivePie
             theme={{
-                axis:{
-                    domain: {           
-                        line:{
-                            stroke:colors.grey[100]
+                axis: {
+                    domain: {
+                        line: {
+                            stroke: colors.grey[100]
                         }
                     },
-                    legend:{
-                        text:{
-                        fill:colors.grey[100] 
+                    legend: {
+                        text: {
+                            fill: colors.grey[100]
                         }
                     },
-                    ticks:{
-                        line:{
-                        stroke:colors.grey[100],
-                        strokeWidth:1
+                    ticks: {
+                        line: {
+                            stroke: colors.grey[100],
+                            strokeWidth: 1
                         },
-                        text:{
-                            fill:colors.grey[100] 
+                        text: {
+                            fill: colors.grey[100]
                         }
                     }
                 },
-                legends:{
-                    text:{
-                        fill:colors.grey[100]
+                legends: {
+                    text: {
+                        fill: colors.grey[100]
                     }
                 },
                 tooltip: {
@@ -49,13 +49,14 @@ const PieChart = ({isDashboard=false}) => {
             padAngle={0.7}
             cornerRadius={3}
             activeOuterRadiusOffset={8}
+            animate={true}
             borderWidth={1}
             borderColor={{
                 from: 'color',
                 modifiers: [
                     [
                         'darker',
-                        0.2
+                        0.6
                     ]
                 ]
             }}
@@ -96,19 +97,19 @@ const PieChart = ({isDashboard=false}) => {
 
             legends={[
                 {
-                    anchor: 'bottom',
-                    direction: 'row',
+                    anchor: 'right',
+                    direction: 'column',
                     justify: false,
                     translateX: 0,
                     translateY: 56,
-                    itemsSpacing: 0,
-                    itemWidth: 100,
+                    itemsSpacing: 2,
+                    itemWidth: 200,
                     itemHeight: 18,
                     itemTextColor: colors.grey[100],
                     itemDirection: 'left-to-right',
                     itemOpacity: 1,
                     symbolSize: 18,
-                    symbolShape: 'circle',
+                    symbolShape: 'square',
                     effects: [
                         {
                             on: 'hover',
@@ -124,4 +125,4 @@ const PieChart = ({isDashboard=false}) => {
 
 }
 
-export default PieChart
+export default PieChart;

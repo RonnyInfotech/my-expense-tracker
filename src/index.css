@@ -8,26 +8,6 @@ body,
   font-family: "Source Sance Pro", sans-serif;
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: #e0e0e0;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #888;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-
 /* custom css */
 .card-text {
   font-family: verdana, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
@@ -74,4 +54,71 @@ body,
 
 #tolbalance {
   color: #81c868;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: auto;
+}
+
+
+
+
+
+
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+ /* ::-webkit-scrollbar {
+  width: 20px;
+  height: 20px;
+} */
+/*
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a8bbbf;
+} */
+
+
+/* pagination style */
+.p-paginator {
+  padding: 0px !important;
+}
+
+.p-paginator .p-paginator-first,
+.p-paginator-last,
+.p-paginator-next,
+.p-paginator-current,
+.p-paginator-prev {
+  height: 2rem !important;
+  min-width: 2rem !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page {
+  min-width: 2rem !important;
+  height: 2rem !important;
+  border-radius: 0 !important;
+}
+
+.p-paginator .p-dropdown {
+  height: 2rem !important;
+}
+
+.p-paginator .p-inputtext {
+  padding: 0.2rem !important;
+}
+
+.p-dropdown .p-dropdown-trigger {
+  width: 2rem !important;
 }
