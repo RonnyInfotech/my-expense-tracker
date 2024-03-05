@@ -9,13 +9,34 @@ import { ExpenseContext } from '../../contexts/ExpenseContext';
 import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
 import { BlockUI } from 'primereact/blockui';
 import { CASHFLOW } from '../../common/constants';
+import { ColumnGroup } from 'primereact/columngroup';
+import { Row } from 'primereact/row';
+import { FilterMatchMode } from 'primereact/api';
+import { sortArray } from '../../common/commonFunction';
 
 const AllTransactions = () => {
-  const { transactions, setTransactions, blocked, setBlocked } = useContext(ExpenseContext);
-  const [selectedIncomes, setSelectedIncomes] = useState(null);
-  const [globalFilter, setGlobalFilter] = useState(null);
+  const { transactions, blocked } = useContext(ExpenseContext);
   const toast = useRef(null);
   const dt = useRef(null);
+  const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'Category.name': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Date: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Time: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Day: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    PaymentMode: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    Description: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    Amount: { value: null, matchMode: FilterMatchMode.CONTAINS }
+  });
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters['global'].value = value;
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
 
   const formatCurrency = (value) => {
     return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
@@ -60,17 +81,41 @@ const AllTransactions = () => {
     )
   };
 
+  const transactionsTotal = () => {
+    let total = 0;
+    let totalIncome = 0;
+    let totalExpense = 0;
+    for (let item of transactions) {
+      if (item.Cashflow === "Income") {
+        totalIncome += item.Amount;
+      } else if (item.Cashflow === "Expense") {
+        totalExpense += item.Amount;
+      }
+    }
+    total = totalIncome - totalExpense;
+    return formatCurrency(total);
+  };
+
   const header = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
       <h4 className="m-0">Manage All Transactions</h4>
       <div>
         <span className="p-input-icon-left">
           <i className="pi pi-search" />
-          <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+          <InputText value={globalFilterValue} onChange={onGlobalFilterChange} type="search" placeholder="Search..." />
         </span>
         <Button label="Export" icon="pi pi-upload" className="p-button-help ml-3" onClick={exportCSV} />
       </div>
     </div>
+  );
+
+  const footerGroup = (
+    <ColumnGroup>
+      <Row>
+        <Column footer="Totals:" colSpan={6} footerStyle={{ textAlign: 'right' }} />
+        <Column style={{ fontWeight: '500' }} footer={transactionsTotal} />
+      </Row>
+    </ColumnGroup>
   );
 
   return (
@@ -81,18 +126,32 @@ const AllTransactions = () => {
         <Header title="All Transactions" subtitle="welcome to you All Transactions" />
       </div>
       <div className="card">
-        <DataTable size='small' ref={dt} value={transactions} selection={selectedIncomes} onSelectionChange={(e) => setSelectedIncomes(e.value)}
-          dataKey="Id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+        <DataTable
+          exportFilename="AllTransactions"
+          scrollable
+          scrollHeight='65vh'
+          className='all-transaction'
+          dataKey="Id"
+          size='small'
+          ref={dt}
+          filters={filters}
+          filterDisplay="row"
+          header={header}
+          value={sortArray(transactions)}
+          footerColumnGroup={footerGroup}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Transactions" globalFilter={globalFilter} header={header}>
-          <Column selectionMode="multiple" exportable={false}></Column>
-          <Column field="Category" header="Category" body={categoryBodyTemplate} sortable ></Column>
-          <Column field="_Date" header="Date" sortable ></Column>
-          <Column field="_Time" header="Time" sortable ></Column>
-          <Column field="Day" header="Day" sortable ></Column>
-          <Column field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable></Column>
-          <Column field="Description" header="Description" sortable></Column>
-          <Column field="Amount" header="Amount" body={priceBodyTemplate} sortable ></Column>
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Transactions"
+        >
+          <Column style={{ minWidth: '10rem' }} field="Category.name" header="Category" body={categoryBodyTemplate} sortable filterField="Category.name" filter filterPlaceholder="Search Category"></Column>
+          <Column style={{ minWidth: '13rem' }} field="Description" header="Description" sortable filter filterPlaceholder="Search Description"></Column>
+          <Column style={{ minWidth: '9rem' }} field="_Day" header="Day" sortable filter filterPlaceholder="Search Day"></Column>
+          <Column style={{ minWidth: '10rem' }} field="_Date" header="Date" sortable filter filterPlaceholder="Search Date"></Column>
+          <Column style={{ minWidth: '10rem' }} field="_Time" header="Time" sortable filter filterPlaceholder="Search Time"></Column>
+          <Column style={{ minWidth: '10rem' }} field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable filter filterPlaceholder="Search Payment"></Column>
+          <Column style={{ minWidth: '11rem' }} field="Amount" header="Amount" body={priceBodyTemplate} sortable filter filterPlaceholder="Search Amount"></Column>
         </DataTable>
       </div>
     </div>

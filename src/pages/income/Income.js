@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import { ExpenseContext } from '../../contexts/ExpenseContext';
 import {
   Column, Toast, Button, Toolbar, InputTextarea, RadioButton, InputNumber, Dialog, InputText, Calendar,
@@ -6,27 +6,57 @@ import {
 } from 'primereact';
 import { addItem, deleteItem, updateItem } from '../../services/firebaseService';
 import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
-import { INCOME_CATEGORY, LISTS } from '../../common/constants';
-import { updateContext } from '../../common/commonFunction';
+import { CASHFLOW, INCOME_CATEGORY, LISTS } from '../../common/constants';
+import { sortArray, updateContext } from '../../common/commonFunction';
 import Header from "../../components/Header/Header";
 import { income } from '../../Models/income';
-import './Income.css';
 import { format } from 'date-fns';
+import { ColumnGroup } from 'primereact/columngroup';
+import { Row } from 'primereact/row';
+import { FilterMatchMode } from 'primereact/api';
+import './Income.css';
 
 const Income = () => {
   const initialState = new income();
-  const { incomes, setIncomes, blocked, setBlocked } = useContext(ExpenseContext);
+  const { blocked, setBlocked, transactions, setTransactions } = useContext(ExpenseContext);
   const [state, setState] = useState(initialState);
   const { Id, Description, TransactionDate, TransactionTime, PaymentMode, Category, Amount, Files, } = state;
+  const [incomes, setIncomes] = useState([]);
+  const [files, setFiles] = useState([]);
   const [deleteIncomesDialog, setDeleteIncomesDialog] = useState(false);
   const [selectedIncomes, setSelectedIncomes] = useState(null);
   const [incomeDialog, setIncomeDialog] = useState(false);
-  const [globalFilter, setGlobalFilter] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [percent, setPercent] = useState(0);
-  const [files, setFiles] = useState([]);
   const toast = useRef(null);
   const dt = useRef(null);
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'Category.name': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Date: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Time: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Day: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    PaymentMode: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    Description: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    Amount: { value: null, matchMode: FilterMatchMode.CONTAINS }
+  });
+  const [globalFilterValue, setGlobalFilterValue] = useState('');
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters['global'].value = value;
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
+
+  const getIncomesItems = () => {
+    setIncomes(sortArray(transactions.filter(ele => ele.Cashflow == CASHFLOW.Income)));
+  };
+
+  useEffect(() => {
+    getIncomesItems();
+  }, [transactions])
 
   const showSuccessToast = (message) => {
     toast.current.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
@@ -66,7 +96,7 @@ const Income = () => {
   };
 
   const openNew = () => {
-    // setState(initialState);
+    setState(initialState);
     setSubmitted(false);
     setIncomeDialog(true);
   };
@@ -104,26 +134,29 @@ const Income = () => {
       setBlocked(false);
       showErrorToast('Please fill required fields.');
     } else {
-      if (Id) {
-        delete state['Day'];
-        delete state['_Date'];
-        delete state['_Time'];
-        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
-          const res = updateContext(incomes, state.Id, state);
-          setIncomes(res);
-          setBlocked(false);
-          showSuccessToast('Income updated successfully');
-        });
-      } else {
-        await addItem(LISTS.TRANSACTIONS.NAME, state).then(() => {
-          incomes.push({
+      delete state['_Day'];
+      delete state['_Date'];
+      delete state['_Time'];
+      if (!Id) {
+        await addItem(LISTS.TRANSACTIONS.NAME, state).then((res) => {
+          transactions.push({
             ...state,
-            Day: format(new Date(state.TransactionDate), 'EEEE'),
+            Id: res.id,
+            _Day: format(new Date(state.TransactionDate), 'EEEE'),
             _Date: format(new Date(state.TransactionDate), 'dd/MM/yyyy'),
             _Time: format(new Date(state.TransactionTime), 'hh:mm a')
           });
-          setBlocked(false);
           showSuccessToast('Income added successfully');
+          getIncomesItems();
+          setBlocked(false);
+        });
+      } else {
+        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
+          const res = updateContext(transactions, state.Id, state);
+          showSuccessToast('Income updated successfully');
+          setTransactions(res);
+          getIncomesItems();
+          setBlocked(false);
         });
       }
       setIncomeDialog(false);
@@ -136,16 +169,16 @@ const Income = () => {
     if (selectedIncomes.length > 0) {
       for (const item of selectedIncomes) {
         await deleteItem(LISTS.TRANSACTIONS.NAME, item.Id).then(() => {
-          let _incomes = incomes.filter((val) => !selectedIncomes.includes(val));
-          setIncomes(_incomes);
-          setDeleteIncomesDialog(false);
-          setSelectedIncomes(null);
-          setBlocked(false);
-        }).catch((err) => {
-          console.log("Err", err);
+        }).catch(() => {
           setBlocked(false);
         });
       }
+      let _incomes = transactions.filter((val) => !selectedIncomes.includes(val));
+      setTransactions(_incomes);
+      getIncomesItems();
+      setDeleteIncomesDialog(false);
+      setSelectedIncomes(null);
+      setBlocked(false);
       showSuccessToast('Incomes Deleted successfully');
     }
   };
@@ -153,7 +186,7 @@ const Income = () => {
   const leftToolbarTemplate = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button label="ADD TRANSACTION" icon="pi pi-plus" severity="success" onClick={openNew} />
+        <Button label="Add Income" icon="pi pi-plus" severity="success" onClick={openNew} />
         <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedIncomes || !selectedIncomes.length} />
       </div>
     );
@@ -168,7 +201,7 @@ const Income = () => {
   };
 
   const priceBodyTemplate = (rowData) => {
-    return <div style={{ color: 'green' }}><b>{formatCurrency(rowData.Amount)}</b></div>
+    return <div style={{ fontWeight: '500' }}>{formatCurrency(rowData.Amount)}</div>
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -210,20 +243,28 @@ const Income = () => {
     )
   };
 
+  const incomesTotal = () => {
+    let total = 0;
+    for (let sale of incomes) {
+      total += sale.Amount;
+    }
+    return formatCurrency(total);
+  };
+
   const header = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
       <h4 className="m-0">Manage Income</h4>
       <span className="p-input-icon-left">
         <i className="pi pi-search" />
-        <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+        <InputText value={globalFilterValue} onChange={onGlobalFilterChange} type="search" placeholder="Search..." />
       </span>
     </div>
   );
 
   const incomeDialogFooter = (
     <React.Fragment>
-      <Button label="ADD" icon="pi pi-check" onClick={saveIncome} />
-      <Button label="CANCEL" icon="pi pi-times" outlined onClick={hideDialog} />
+      <Button label={Id ? 'Save' : 'Add'} icon="pi pi-check" onClick={saveIncome} />
+      <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
     </React.Fragment>
   );
 
@@ -232,6 +273,15 @@ const Income = () => {
       <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteIncomesDialog} />
       <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedIncomes} />
     </React.Fragment>
+  );
+
+  const footerGroup = (
+    <ColumnGroup>
+      <Row>
+        <Column footer="Totals:" colSpan={8} footerStyle={{ textAlign: 'right' }} />
+        <Column style={{ color: 'green', fontWeight: '500' }} footer={incomesTotal} />
+      </Row>
+    </ColumnGroup>
   );
 
   return (
@@ -243,26 +293,32 @@ const Income = () => {
       </div>
 
       <div className="card">
-        <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-        <DataTable size='small' ref={dt} value={incomes} selection={selectedIncomes} onSelectionChange={(e) => setSelectedIncomes(e.value)}
+        <Toolbar left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
+        <DataTable
+          exportFilename="Incomes"
+          scrollable
+          scrollHeight='57vh'
+          footerColumnGroup={footerGroup} size='small' ref={dt} value={incomes} selection={selectedIncomes} onSelectionChange={(e) => setSelectedIncomes(e.value)}
           dataKey="Id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} incomes" globalFilter={globalFilter} header={header}>
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} incomes" filters={filters} filterDisplay="row" header={header}
+          emptyMessage="No Incomes found."
+        >
           <Column selectionMode="multiple" exportable={false}></Column>
           <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column>
-          <Column field="Category" header="Category" body={categoryBodyTemplate} sortable ></Column>
-          <Column field="_Date" header="Date" sortable ></Column>
-          <Column field="_Time" header="Time" sortable ></Column>
-          <Column field="Day" header="Day" sortable ></Column>
-          <Column field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable></Column>
-          <Column field="Description" header="Description" sortable></Column>
-          <Column field="Amount" header="Amount" body={priceBodyTemplate} sortable ></Column>
+          <Column style={{ minWidth: '10rem' }} field="Category.name" header="Category" body={categoryBodyTemplate} sortable filterField="Category.name" filter filterPlaceholder="Search Category"></Column>
+          <Column style={{ minWidth: '10rem' }} field="_Date" header="Date" sortable filter filterPlaceholder="Search Date"></Column>
+          <Column style={{ minWidth: '10rem' }} field="_Time" header="Time" sortable filter filterPlaceholder="Search Time"></Column>
+          <Column style={{ minWidth: '9rem' }} field="_Day" header="Day" sortable filter filterPlaceholder="Search Day"></Column>
+          <Column style={{ minWidth: '10rem' }} field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable filter filterPlaceholder="Search Payment"></Column>
+          <Column style={{ minWidth: '10rem' }} field="Description" header="Description" sortable filter filterPlaceholder="Search Description"></Column>
+          <Column style={{ minWidth: '11rem' }} field="Amount" header="Amount" body={priceBodyTemplate} sortable filter filterPlaceholder="Search Amount"></Column>
         </DataTable>
       </div>
 
-      <Dialog visible={incomeDialog} style={{ width: '40rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="New Transaction" modal className="p-fluid" footer={incomeDialogFooter} onHide={hideDialog}>
+      <Dialog visible={incomeDialog} style={{ width: '40rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={Id ? 'Edit Income' : 'New Income'} modal className="p-fluid" footer={incomeDialogFooter} onHide={hideDialog}>
         <div className="field">
-          <label htmlFor="Descriptions">Descriptions</label>
+          <label htmlFor="Descriptions">Description</label>
           <InputTextarea
             className={classNames({ 'p-invalid': submitted && !Description?.trim().length })}
             autoFocus
@@ -285,6 +341,7 @@ const Income = () => {
               name='TransactionDate'
               value={TransactionDate}
               onChange={handleChange}
+              dateFormat="dd/mm/yy"
             />
             {submitted && !TransactionDate && <small className="p-error">Date is Required Field.</small>}
           </div>

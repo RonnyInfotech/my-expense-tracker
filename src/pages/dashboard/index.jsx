@@ -90,7 +90,7 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="col-12" style={{ border: '1px solid' }}>
-          <Pie />
+          {/* <Pie /> */}
         </div>
         <div className="col-12 md:col-6">
           <AccountBalance />

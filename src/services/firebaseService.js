@@ -30,10 +30,10 @@ export const filterItem = async (listName, column, value) => {
 
 export const addItem = async (listName, itemData) => {
     try {
-        const docRef = await addDoc(collection(db, listName), itemData);
+        return await addDoc(collection(db, listName), itemData);
         // const docSnapshot = await getDoc(docRef);
         // console.log("doc_refs...", docSnapshot.data());
-        return docRef.id;
+        // return docRef.id;
     } catch (error) {
         console.log(error);
         return error

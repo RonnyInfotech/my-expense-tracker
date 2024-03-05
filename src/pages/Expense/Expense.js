@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage"
 import { storage } from '../../services/firebase';
 import {
@@ -7,29 +7,59 @@ import {
 } from 'primereact';
 import { addItem, deleteItem, updateItem } from '../../services/firebaseService';
 import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
-import { EXPENSE_CATEGORY, LISTS } from '../../common/constants';
+import { CASHFLOW, EXPENSE_CATEGORY, LISTS } from '../../common/constants';
 import { ExpenseContext } from '../../contexts/ExpenseContext';
-import { updateContext } from '../../common/commonFunction';
+import { sortArray, updateContext } from '../../common/commonFunction';
 import Header from "../../components/Header/Header";
 import { expense } from '../../Models/expenses';
-import './Expense.css';
 import { format } from 'date-fns';
+import { Row } from 'primereact/row';
+import { ColumnGroup } from 'primereact/columngroup';
+import { FilterMatchMode } from 'primereact/api';
+import './Expense.css';
 
 const Expense = () => {
   const initialState = new expense();
-  const { expenses, setExpenses, blocked, setBlocked } = useContext(ExpenseContext);
+  const { transactions, setTransactions, blocked, setBlocked } = useContext(ExpenseContext);
   const [state, setState] = useState(initialState);
   const { Id, Description, TransactionDate, TransactionTime, PaymentMode, Category, Amount, Files } = state;
+  const [expenses, setExpenses] = useState([]);
+  const [files, setFiles] = useState([]);
   const [expenseDialog, setExpenseDialog] = useState(false);
   const [deleteExpensesDialog, setDeleteExpensesDialog] = useState(false);
   const [selectedExpenses, setSelectedExpenses] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-  const [globalFilter, setGlobalFilter] = useState(null);
   const [percent, setPercent] = useState(0);
-  const [files, setFiles] = useState([]);
   const [urls, setURLs] = useState([]);
   const toast = useRef(null);
   const dt = useRef(null);
+  const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [filters, setFilters] = useState({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'Category.name': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Date: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Time: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    _Day: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    PaymentMode: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    Description: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    Amount: { value: null, matchMode: FilterMatchMode.CONTAINS }
+  });
+
+  const onGlobalFilterChange = (e) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters['global'].value = value;
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  };
+
+  const getExpensesItems = () => {
+    setExpenses(sortArray(transactions.filter(ele => ele.Cashflow == CASHFLOW.Expense)));
+  };
+
+  useEffect(() => {
+    getExpensesItems();
+  }, [transactions]);
 
   const showSuccessToast = (message) => {
     toast.current.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
@@ -56,7 +86,6 @@ const Expense = () => {
         </div>
       );
     }
-
     return <span>{props.placeholder}</span>;
   };
 
@@ -158,26 +187,32 @@ const Expense = () => {
       setBlocked(false);
       showErrorToast('Please fill required fields.');
     } else {
-      delete state['Day'];
+      delete state['_Day'];
       delete state['_Date'];
       delete state['_Time'];
-      if (Id) {
-        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
-          const res = updateContext(expenses, state.Id, state);
-          setExpenses(res);
-          setBlocked(false);
-          showSuccessToast('Income updated successfully');
-        });
-      } else {
-        await addItem(LISTS.TRANSACTIONS.NAME, state).then(() => {
-          expenses.push({
+      if (!Id) {
+        await addItem(LISTS.TRANSACTIONS.NAME, state).then((res) => {
+          transactions.push({
             ...state,
-            Day: format(new Date(state.TransactionDate), 'EEEE'),
+            Id: res.id,
+            _Day: format(new Date(state.TransactionDate), 'EEEE'),
             _Date: format(new Date(state.TransactionDate), 'dd/MM/yyyy'),
             _Time: format(new Date(state.TransactionTime), 'hh:mm a')
           });
-          setBlocked(false);
           showSuccessToast('Income added successfully');
+          getExpensesItems();
+          setBlocked(false);
+        });
+      } else {
+        delete state['_Day'];
+        delete state['_Date'];
+        delete state['_Time'];
+        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
+          const res = updateContext(transactions, state.Id, state);
+          showSuccessToast('Expense updated successfully');
+          setTransactions(res);
+          getExpensesItems();
+          setBlocked(false);
         });
       }
       setExpenseDialog(false);
@@ -189,16 +224,16 @@ const Expense = () => {
     if (selectedExpenses.length > 0) {
       for (const item of selectedExpenses) {
         await deleteItem(LISTS.TRANSACTIONS.NAME, item.Id).then(() => {
-          let _expenses = expenses.filter((val) => !selectedExpenses.includes(val));
-          setExpenses(_expenses);
-          setDeleteExpensesDialog(false);
-          setSelectedExpenses(null);
-          setBlocked(false);
-        }).catch((err) => {
-          console.log("Err", err);
+        }).catch(() => {
           setBlocked(false);
         });
       }
+      let _expenses = transactions.filter((val) => !selectedExpenses.includes(val));
+      setExpenses(_expenses);
+      getExpensesItems();
+      setDeleteExpensesDialog(false);
+      setSelectedExpenses(null);
+      setBlocked(false);
       showSuccessToast('Expenses Deleted successfully');
     }
   };
@@ -208,14 +243,14 @@ const Expense = () => {
   const leftToolbarTemplate = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button size="small" label="ADD TRANSACTION" icon="pi pi-plus" severity="success" onClick={openNew} />
-        <Button size="small" label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedExpenses || !selectedExpenses.length} />
+        <Button label="Add Expense" icon="pi pi-plus" severity="success" onClick={openNew} />
+        <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedExpenses || !selectedExpenses.length} />
       </div>
     );
   };
 
   const rightToolbarTemplate = () => {
-    return <Button size="small" label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+    return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
   };
 
   const formatCurrency = (value) => {
@@ -223,13 +258,13 @@ const Expense = () => {
   };
 
   const priceBodyTemplate = (rowData) => {
-    return <div style={{ color: 'red' }}><b>{formatCurrency(rowData.Amount)}</b></div>
+    return <div style={{ fontWeight: '500' }}>{formatCurrency(rowData.Amount)}</div>
   };
 
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
-        <Button size="small" icon="pi pi-pencil" rounded text className="mr-2" onClick={() => editProduct(rowData)} />
+        <Button icon="pi pi-pencil" rounded text className="mr-2" onClick={() => editProduct(rowData)} />
       </React.Fragment>
     );
   };
@@ -265,36 +300,50 @@ const Expense = () => {
     )
   };
 
+  const expensesTotal = () => {
+    let total = 0;
+    for (let sale of expenses) {
+      total += sale.Amount;
+    }
+    return formatCurrency(total);
+  };
+
   // console.log("files...", files);
   // console.log("urls...", urls);
-
-  console.log("state>>>>>>>>>", state);
-
-  const header = (
-    <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-      <h4 className="m-0">Manage Expense</h4>
-      <span className="p-input-icon-left">
-        <i className="pi pi-search" />
-        <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
-      </span>
-    </div>
-  );
+  const header = () => {
+    return (
+      <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
+        <h4 className="m-0">Manage Expense</h4>
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <InputText value={globalFilterValue} onChange={onGlobalFilterChange} type="search" placeholder="Search..." />
+        </span>
+      </div>
+    )
+  };
 
   const expenseDialogFooter = (
     <React.Fragment>
-      <Button size="small" label="ADD" icon="pi pi-check" onClick={saveExpense} />
-      <Button size="small" label="CANCEL" icon="pi pi-times" outlined onClick={hideDialog} />
+      <Button label={Id ? 'Save' : 'Add'} icon="pi pi-check" onClick={saveExpense} />
+      <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
     </React.Fragment>
   );
 
   const deleteExpensesDialogFooter = (
     <React.Fragment>
-      <Button size="small" label="No" icon="pi pi-times" outlined onClick={hideDeleteExpensesDialog} />
-      <Button size="small" label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedExpenses} />
+      <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteExpensesDialog} />
+      <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedExpenses} />
     </React.Fragment>
   );
 
-  console.log("expenses..", expenses)
+  const footerGroup = (
+    <ColumnGroup>
+      <Row>
+        <Column footer="Totals:" colSpan={8} footerStyle={{ textAlign: 'right' }} />
+        <Column style={{ color: 'red', fontWeight: '500' }} footer={expensesTotal} />
+      </Row>
+    </ColumnGroup>
+  );
 
   return (
     <div style={{ margin: '20px' }}>
@@ -303,27 +352,31 @@ const Expense = () => {
       <div className="flex justify-content-between align-items-center">
         <Header title="EXPENSE" subtitle="Manage Expense" />
       </div>
-      <div>
+      <div className='card'>
         <Toolbar left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-        <DataTable scrollHeight='68vh' scrollable size='small' ref={dt} value={expenses} selection={selectedExpenses} onSelectionChange={(e) => setSelectedExpenses(e.value)}
+        <DataTable
+          exportFilename="Expenses"
+          scrollable
+          scrollHeight='57vh'
+          footerColumnGroup={footerGroup} size='small' ref={dt} value={expenses} selection={selectedExpenses} onSelectionChange={(e) => setSelectedExpenses(e.value)}
           dataKey="Id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} expenses" globalFilter={globalFilter} header={header}>
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Expenses" filters={filters} filterDisplay="row" header={header}>
           <Column selectionMode="multiple" exportable={false}></Column>
           <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column>
-          <Column field="Category" header="Category" body={categoryBodyTemplate} sortable ></Column>
-          <Column field="_Date" header="Date" sortable ></Column>
-          <Column field="_Time" header="Time" sortable ></Column>
-          <Column field="Day" header="Day" sortable ></Column>
-          <Column field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable></Column>
-          <Column field="Description" header="Description" sortable></Column>
-          <Column field="Amount" header="Amount" body={priceBodyTemplate} sortable ></Column>
+          <Column style={{ minWidth: '10rem' }} field="Category.name" header="Category" body={categoryBodyTemplate} sortable filterField="Category.name" filter filterPlaceholder="Search Category"></Column>
+          <Column style={{ minWidth: '10rem' }} field="Description" header="Description" sortable filter filterPlaceholder="Search Description"></Column>
+          <Column style={{ minWidth: '9rem' }} field="_Day" header="Day" sortable filter filterPlaceholder="Search Day"></Column>
+          <Column style={{ minWidth: '10rem' }} field="_Date" header="Date" sortable filter filterPlaceholder="Search Date"></Column>
+          <Column style={{ minWidth: '10rem' }} field="_Time" header="Time" sortable filter filterPlaceholder="Search Time"></Column>
+          <Column style={{ minWidth: '10rem' }} field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable filter filterPlaceholder="Search Payment"></Column>
+          <Column style={{ minWidth: '11rem' }} field="Amount" header="Amount" body={priceBodyTemplate} sortable filter filterPlaceholder="Search Amount"></Column>
         </DataTable>
       </div>
 
-      <Dialog visible={expenseDialog} style={{ width: '40rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="New Transaction" modal className="p-fluid" footer={expenseDialogFooter} onHide={hideDialog}>
+      <Dialog visible={expenseDialog} style={{ width: '40rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={Id ? 'Edit Expense' : 'New Expense'} modal className="p-fluid" footer={expenseDialogFooter} onHide={hideDialog}>
         <div className="field">
-          <label htmlFor="Descriptions">Descriptions</label>
+          <label htmlFor="Descriptions">Description</label>
           <InputTextarea
             className={classNames({ 'p-invalid': submitted && !Description?.trim().length })}
             autoFocus
@@ -347,6 +400,7 @@ const Expense = () => {
               name='TransactionDate'
               value={TransactionDate}
               onChange={handleChange}
+              dateFormat="dd/mm/yy"
             />
             {submitted && !TransactionDate && <small className="p-error">Date is Required Field.</small>}
           </div>
