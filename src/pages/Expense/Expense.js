@@ -16,11 +16,13 @@ import { format } from 'date-fns';
 import { Row } from 'primereact/row';
 import { ColumnGroup } from 'primereact/columngroup';
 import { FilterMatchMode } from 'primereact/api';
+import { ProgressBar } from 'primereact/progressbar';
+import FileViewer from '../../components/FileViewer/FileViewer';
 import './Expense.css';
 
 const Expense = () => {
   const initialState = new expense();
-  const { transactions, setTransactions, blocked, setBlocked } = useContext(ExpenseContext);
+  const { transactions, setTransactions, blocked, setBlocked, updateFileState } = useContext(ExpenseContext);
   const [state, setState] = useState(initialState);
   const { Id, Description, TransactionDate, TransactionTime, PaymentMode, Category, Amount, Files } = state;
   const [expenses, setExpenses] = useState([]);
@@ -29,7 +31,7 @@ const Expense = () => {
   const [deleteExpensesDialog, setDeleteExpensesDialog] = useState(false);
   const [selectedExpenses, setSelectedExpenses] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-  const [percent, setPercent] = useState(0);
+  const [progress, setProgress] = useState(null);
   const [urls, setURLs] = useState([]);
   const toast = useRef(null);
   const dt = useRef(null);
@@ -60,6 +62,12 @@ const Expense = () => {
   useEffect(() => {
     getExpensesItems();
   }, [transactions]);
+
+  useEffect(() => {
+    if (updateFileState) {
+      setState(updateFileState);
+    }
+  }, [updateFileState]);
 
   const showSuccessToast = (message) => {
     toast.current.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
@@ -99,6 +107,8 @@ const Expense = () => {
   };
 
   const openNew = () => {
+    setURLs([]);
+    setProgress(null);
     setState(initialState);
     setSubmitted(false);
     setExpenseDialog(true);
@@ -125,63 +135,37 @@ const Expense = () => {
     });
   }
 
-  const editProduct = (rowData) => {
+  const editExpense = (rowData) => {
     setState(rowData);
     setExpenseDialog(true);
   };
 
-  const saveExpense = async () => {
-    // if (files.length === 0) {
-    //   alert("Please choose a file first!")
-    // }
+  useEffect(() => {
+    fileUpload();
+  }, [files.length > 0]);
 
-    // const storageRef = ref(storage, `/files/${files.name}`)
-    // const uploadTask = uploadBytesResumable(storageRef, files);
-
-    // uploadTask.on(
-    //   "state_changed",
-    //   (snapshot) => {
-    //     const percent = Math.round(
-    //       (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-    //     );
-
-    //     // update progress
-    //     setPercent(percent);
-    //   },
-    //   (err) => console.log(err),
-    //   () => {
-    //     // download url
-    //     getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-    //       console.log(url);
-    //     });
-    //   }
-    // );
-
+  const fileUpload = () => {
     files.map((file) => {
-      console.log('loop');
-
       const storageRef = ref(storage, `files/${file.name}`);
-
       const uploadTask = uploadBytesResumable(storageRef, file);
-      // promises.push(uploadTask)
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          const prog = Math.round(
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          );
-          setPercent(prog);
-        },
-        (error) => console.log(error),
-        async () => {
+          const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          setProgress(percent);
+        }, (error) => console.log(error), async () => {
           await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
-            setURLs(prevState => [...prevState, downloadURLs])
+            setURLs(prevState => [...prevState, downloadURLs]);
             console.log("File available at", downloadURLs);
           });
         }
       );
     })
+  };
 
+  console.log("demo>>>>>>>>>>>>>>", state?.Files?.concat(urls));
+
+  const saveExpense = async () => {
     if (!Description.trim().length || !TransactionDate || !TransactionTime || !PaymentMode || !Category || !Amount) {
       setSubmitted(true);
       setBlocked(false);
@@ -191,10 +175,11 @@ const Expense = () => {
       delete state['_Date'];
       delete state['_Time'];
       if (!Id) {
-        await addItem(LISTS.TRANSACTIONS.NAME, state).then((res) => {
+        await addItem(LISTS.TRANSACTIONS.NAME, { ...state, Files: urls }).then((res) => {
           transactions.push({
             ...state,
             Id: res.id,
+            Files: urls,
             _Day: format(new Date(state.TransactionDate), 'EEEE'),
             _Date: format(new Date(state.TransactionDate), 'dd/MM/yyyy'),
             _Time: format(new Date(state.TransactionTime), 'hh:mm a')
@@ -204,17 +189,17 @@ const Expense = () => {
           setBlocked(false);
         });
       } else {
-        delete state['_Day'];
-        delete state['_Date'];
-        delete state['_Time'];
-        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
-          const res = updateContext(transactions, state.Id, state);
+        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, { ...state, Files: state.Files.concat(urls) }).then(() => {
+          const res = updateContext(transactions, state.Id, { ...state, Files: state.Files.concat(urls) });
           showSuccessToast('Expense updated successfully');
           setTransactions(res);
           getExpensesItems();
           setBlocked(false);
         });
       }
+      setFiles([]);
+      setURLs([]);
+      setProgress(null);
       setExpenseDialog(false);
     }
   };
@@ -229,7 +214,7 @@ const Expense = () => {
         });
       }
       let _expenses = transactions.filter((val) => !selectedExpenses.includes(val));
-      setExpenses(_expenses);
+      setTransactions(_expenses);
       getExpensesItems();
       setDeleteExpensesDialog(false);
       setSelectedExpenses(null);
@@ -237,8 +222,6 @@ const Expense = () => {
       showSuccessToast('Expenses Deleted successfully');
     }
   };
-
-  console.log("percent..........", percent);
 
   const leftToolbarTemplate = () => {
     return (
@@ -264,7 +247,7 @@ const Expense = () => {
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
-        <Button icon="pi pi-pencil" rounded text className="mr-2" onClick={() => editProduct(rowData)} />
+        <Button icon="pi pi-pencil" rounded text className="mr-2" onClick={() => editExpense(rowData)} />
       </React.Fragment>
     );
   };
@@ -308,8 +291,6 @@ const Expense = () => {
     return formatCurrency(total);
   };
 
-  // console.log("files...", files);
-  // console.log("urls...", urls);
   const header = () => {
     return (
       <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
@@ -324,7 +305,7 @@ const Expense = () => {
 
   const expenseDialogFooter = (
     <React.Fragment>
-      <Button label={Id ? 'Save' : 'Add'} icon="pi pi-check" onClick={saveExpense} />
+      <Button label={Id ? 'Save' : 'Add'} icon="pi pi-check" onClick={saveExpense} disabled={files.length > 0 && progress < 100} />
       <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
     </React.Fragment>
   );
@@ -344,6 +325,21 @@ const Expense = () => {
       </Row>
     </ColumnGroup>
   );
+
+  const headerTemplate = (options) => {
+    const { className, chooseButton, uploadButton, cancelButton } = options;
+    return (
+      <div className={className} style={{ backgroundColor: 'transparent', display: 'flex', alignItems: 'center' }}>
+        {chooseButton}
+        {uploadButton}
+        {cancelButton}
+        <div className="flex align-items-center gap-3 ml-auto">
+          <span>{progress && `${progress} %`}</span>
+          <ProgressBar value={progress} showValue={false} style={{ width: '10rem', height: '12px' }}></ProgressBar>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div style={{ margin: '20px' }}>
@@ -457,8 +453,21 @@ const Expense = () => {
 
         <div className="field">
           <label htmlFor="EnterAmount">Select File</label>
-          <FileUpload name="documentsToEvidence" auto chooseLabel="Choose" url="/" customUpload uploadHandler={(e) => setFiles(e.files)} onRemove={(e) => setFiles([])} accept="*" emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>} multiple />
+          <FileUpload
+            name="documentsToEvidence"
+            auto
+            chooseLabel="Choose"
+            url="/"
+            customUpload
+            uploadHandler={(e) => setFiles(e.files)}
+            onRemove={(e) => setFiles([])}
+            accept="*"
+            emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>}
+            multiple
+            headerTemplate={headerTemplate}
+          />
         </div>
+        {Id && <div className='field'><FileViewer FilesItem={Files} item={state} /></div>}
       </Dialog>
 
       <Dialog visible={deleteExpensesDialog} style={{ width: '35rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteExpensesDialogFooter} onHide={hideDeleteExpensesDialog}>

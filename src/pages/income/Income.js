@@ -14,11 +14,15 @@ import { format } from 'date-fns';
 import { ColumnGroup } from 'primereact/columngroup';
 import { Row } from 'primereact/row';
 import { FilterMatchMode } from 'primereact/api';
+import FileViewer from '../../components/FileViewer/FileViewer';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { storage } from '../../services/firebase';
+import { ProgressBar } from 'primereact/progressbar';
 import './Income.css';
 
 const Income = () => {
   const initialState = new income();
-  const { blocked, setBlocked, transactions, setTransactions } = useContext(ExpenseContext);
+  const { blocked, setBlocked, transactions, setTransactions, updateFileState } = useContext(ExpenseContext);
   const [state, setState] = useState(initialState);
   const { Id, Description, TransactionDate, TransactionTime, PaymentMode, Category, Amount, Files, } = state;
   const [incomes, setIncomes] = useState([]);
@@ -27,7 +31,8 @@ const Income = () => {
   const [selectedIncomes, setSelectedIncomes] = useState(null);
   const [incomeDialog, setIncomeDialog] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [percent, setPercent] = useState(0);
+  const [progress, setProgress] = useState(null);
+  const [urls, setURLs] = useState([]);
   const toast = useRef(null);
   const dt = useRef(null);
   const [filters, setFilters] = useState({
@@ -56,7 +61,13 @@ const Income = () => {
 
   useEffect(() => {
     getIncomesItems();
-  }, [transactions])
+  }, [transactions]);
+
+  useEffect(() => {
+    if (updateFileState) {
+      setState(updateFileState);
+    }
+  }, [updateFileState]);
 
   const showSuccessToast = (message) => {
     toast.current.show({ severity: 'success', summary: 'Success', detail: message, life: 3000 });
@@ -96,6 +107,8 @@ const Income = () => {
   };
 
   const openNew = () => {
+    setURLs([]);
+    setProgress(null);
     setState(initialState);
     setSubmitted(false);
     setIncomeDialog(true);
@@ -127,6 +140,29 @@ const Income = () => {
     setIncomeDialog(true);
   };
 
+  useEffect(() => {
+    fileUpload();
+  }, [files.length > 0]);
+
+  const fileUpload = () => {
+    files.map((file) => {
+      const storageRef = ref(storage, `files/${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          setProgress(percent);
+        }, (error) => console.log(error), async () => {
+          await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
+            setURLs(prevState => [...prevState, downloadURLs]);
+            console.log("File available at", downloadURLs);
+          });
+        }
+      );
+    })
+  };
+
   const saveIncome = async () => {
     setBlocked(true);
     if (!Description.trim().length || !TransactionDate || !TransactionTime || !PaymentMode || !Category || !Amount) {
@@ -138,10 +174,11 @@ const Income = () => {
       delete state['_Date'];
       delete state['_Time'];
       if (!Id) {
-        await addItem(LISTS.TRANSACTIONS.NAME, state).then((res) => {
+        await addItem(LISTS.TRANSACTIONS.NAME, { ...state, Files: urls }).then((res) => {
           transactions.push({
             ...state,
             Id: res.id,
+            Files: urls,
             _Day: format(new Date(state.TransactionDate), 'EEEE'),
             _Date: format(new Date(state.TransactionDate), 'dd/MM/yyyy'),
             _Time: format(new Date(state.TransactionTime), 'hh:mm a')
@@ -151,14 +188,17 @@ const Income = () => {
           setBlocked(false);
         });
       } else {
-        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, state).then(() => {
-          const res = updateContext(transactions, state.Id, state);
+        await updateItem(LISTS.TRANSACTIONS.NAME, state.Id, { ...state, Files: state.Files.concat(urls) }).then(() => {
+          const res = updateContext(transactions, state.Id, { ...state, Files: state.Files.concat(urls) });
           showSuccessToast('Income updated successfully');
           setTransactions(res);
           getIncomesItems();
           setBlocked(false);
         });
       }
+      setFiles([]);
+      setURLs([]);
+      setProgress(null);
       setIncomeDialog(false);
       setBlocked(false);
     }
@@ -284,6 +324,21 @@ const Income = () => {
     </ColumnGroup>
   );
 
+  const headerTemplate = (options) => {
+    const { className, chooseButton, uploadButton, cancelButton } = options;
+    return (
+      <div className={className} style={{ backgroundColor: 'transparent', display: 'flex', alignItems: 'center' }}>
+        {chooseButton}
+        {uploadButton}
+        {cancelButton}
+        <div className="flex align-items-center gap-3 ml-auto">
+          <span>{progress && `${progress} %`}</span>
+          <ProgressBar value={progress} showValue={false} style={{ width: '10rem', height: '12px' }}></ProgressBar>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={{ margin: '20px' }}>
       <Toast ref={toast} />
@@ -398,8 +453,21 @@ const Income = () => {
 
         <div className="field">
           <label htmlFor="EnterAmount">Select File</label>
-          <FileUpload name="documentsToEvidence" auto chooseLabel="Choose" url="/" customUpload uploadHandler={(e) => setFiles(e.files)} onRemove={(e) => setFiles([])} accept="*" emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>} multiple />
+          <FileUpload
+            name="documentsToEvidence"
+            auto
+            chooseLabel="Choose"
+            url="/"
+            customUpload
+            uploadHandler={(e) => setFiles(e.files)}
+            onRemove={(e) => setFiles([])}
+            accept="*"
+            emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>}
+            multiple
+            headerTemplate={headerTemplate}
+          />
         </div>
+        {Id && <div className='field'><FileViewer FilesItem={Files} item={state} /></div>}
       </Dialog>
 
       <Dialog visible={deleteIncomesDialog} style={{ width: '35rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteIncomesDialogFooter} onHide={hideDeleteIncomesDialog}>
