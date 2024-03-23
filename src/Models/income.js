@@ -1,11 +1,10 @@
 import { CASHFLOW } from "../common/constants";
-
 export class income {
     Id = null;
     Cashflow = CASHFLOW.Income;
     Description = '';
-    TransactionDate = null;
-    TransactionTime = null;
+    TransactionDate = new Date();
+    TransactionTime = new Date();
     PaymentMode = null;
     Category = null;
     Amount = null;

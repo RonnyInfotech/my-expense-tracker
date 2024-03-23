@@ -10,6 +10,7 @@ const ExpenseContextProvider = (props) => {
     const [expenses, setExpenses] = useState([]);
     const [blocked, setBlocked] = useState(false);
     const [transactions, setTransactions] = useState([]);
+    const [updateFileState, setUpdateFileState] = useState(null);
 
     const getTransactionsData = async () => {
         setBlocked(true);
@@ -39,7 +40,9 @@ const ExpenseContextProvider = (props) => {
                 transactions,
                 setTransactions,
                 blocked,
-                setBlocked
+                setBlocked,
+                updateFileState,
+                setUpdateFileState
             }}>
             {props.children}
         </ExpenseContext.Provider>
