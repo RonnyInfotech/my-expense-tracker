@@ -1,0 +1,9 @@
+.request-file-datascroller .request-file-item {
+    display: flex;
+    align-items: center;
+    padding: 0.3rem;
+}
+
+.request-file-datascroller .request-file-item .request-file-detail {
+    flex: 1 1 0;
+}

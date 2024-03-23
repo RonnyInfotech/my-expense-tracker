@@ -3,8 +3,8 @@ export class expense {
     Id = null;
     Cashflow = CASHFLOW.Expense;
     Description = '';
-    TransactionDate = null;
-    TransactionTime = null;
+    TransactionDate = new Date();
+    TransactionTime = new Date();
     PaymentMode = null;
     Category = null;
     Amount = null;
