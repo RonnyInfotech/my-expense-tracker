@@ -1,5 +1,5 @@
 // docs https://github.com/azouaoui-med/react-pro-sidebar
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Menu, Sidebar, MenuItem } from "react-pro-sidebar";
 import { useProSidebar } from "react-pro-sidebar";
 
@@ -25,6 +25,8 @@ import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import SwitchRightOutlinedIcon from "@mui/icons-material/SwitchRightOutlined";
 import SwitchLeftOutlinedIcon from "@mui/icons-material/SwitchLeftOutlined";
 import './MyProSidebar.css';
+import { calculateIncomeExpenseAndBalance } from "../../../common/commonFunction";
+import { ExpenseContext } from "../../../contexts/ExpenseContext";
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -43,11 +45,19 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 };
 
 const MyProSidebar = () => {
+  const { transactions } = useContext(ExpenseContext);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [selected, setSelected] = useState("Dashboard");
   const { sidebarRTL, setSidebarRTL, sidebarImage } = useSidebarContext();
   const { collapseSidebar, toggleSidebar, collapsed, broken } = useProSidebar();
+
+  const { balance } = calculateIncomeExpenseAndBalance(transactions);
+
+  const formatCurrency = (value) => {
+    return value.toLocaleString('en-IN', { style: 'currency', maximumFractionDigits: 2, currency: 'INR' });
+  };
+
   return (
     <div className="side-bar-menu">
       <Sidebar
@@ -96,7 +106,7 @@ const MyProSidebar = () => {
                 <h2>Bhautik Ladva</h2>
                 <div className='wallet-container'>
                   <span style={{ height: '27px' }}><img src={require('../../../assets/Images/cash-wallet.png')} alt="Cash Wallet" style={{ width: '23px' }} /></span>
-                  <span className="current-balance ml-2">₹ 12,2000/-</span>
+                  <span className="current-balance ml-2">{formatCurrency(balance)}</span>
                 </div>
               </div>
             </div>

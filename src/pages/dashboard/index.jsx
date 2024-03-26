@@ -1,36 +1,28 @@
 import {
-  Box,
-  // Button,
-  IconButton,
-  Typography,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
 import { tokens } from "../../theme";
-import { mockTransactions } from "../../data/mockData";
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
-import EmailIcon from "@mui/icons-material/Email";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import TrafficIcon from "@mui/icons-material/Traffic";
 import Header from "../../components/Header/Header";
-import LineChart from "../../components/LineChart";
-import GeographyChart from "../../components/GeographyChart";
-import BarChart from "../../components/BarChart";
 import StatBox from "../../components/StatBox/StatBox";
-import ProgressCircle from "../../components/ProgressCircle";
 import { Button } from 'primereact/button';
-import Pie from "./../pie";
-import './Dashboard.css';
 import AccountBalance from "../../components/AccountBalance/AccountBalance";
 import IncomeExpense from "../../components/IncomeExpense/IncomeExpense";
 import RecentTransactions from "../../components/RecentTransactions/RecentTransactions";
+import './Dashboard.css';
+import { useContext } from "react";
+import { ExpenseContext } from "../../contexts/ExpenseContext";
+import { calculateIncomeExpenseAndBalance } from "../../common/commonFunction";
 
 const Dashboard = () => {
+  const { transactions } = useContext(ExpenseContext);
   const theme = useTheme();
   const smScreen = useMediaQuery(theme.breakpoints.up("sm"));
-  const colors = tokens(theme.palette.mode);
+
+  const result = calculateIncomeExpenseAndBalance(transactions);
+  const { totalIncome, totalExpense, balance, incomePercentage, expensePercentage, balancePercentage } = calculateIncomeExpenseAndBalance(transactions);
+  console.log("transactions>>>>>>>>>>", transactions);
+  
   return (
     <div style={{ margin: '20px' }}>
       {/* HEADER */}
@@ -48,10 +40,10 @@ const Dashboard = () => {
         <div className="col-12 md:col-12 lg:col-6 xl:col-3">
           <div className="dashboard-wrapper">
             <StatBox
-              title="12,361"
+              title={totalIncome?.toLocaleString()}
               subtitle="Income"
-              progress="0.75"
-              increase="+14%"
+              progress={incomePercentage / 100}
+              increase={incomePercentage.toFixed(2) + '%'}
               icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
             />
           </div>
@@ -59,10 +51,10 @@ const Dashboard = () => {
         <div className="col-12 md:col-12 lg:col-6 xl:col-3">
           <div className="dashboard-wrapper">
             <StatBox
-              title="431,225"
+              title={totalExpense?.toLocaleString()}
               subtitle="Expenses"
-              progress="0.50"
-              increase="+21%"
+              progress={expensePercentage / 100}
+              increase={expensePercentage.toFixed(2) + '%'}
               icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
             />
           </div>
@@ -70,10 +62,10 @@ const Dashboard = () => {
         <div className="col-12 md:col-12 lg:col-6 xl:col-3">
           <div className="dashboard-wrapper">
             <StatBox
-              title="32,441"
+              title={balance?.toLocaleString()}
               subtitle="Balance"
-              progress="0.30"
-              increase="+5%"
+              progress={balancePercentage / 100}
+              increase={balancePercentage.toFixed(2) + '%'}
               icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
             />
           </div>
@@ -81,11 +73,11 @@ const Dashboard = () => {
         <div className="col-12 md:col-12 lg:col-6 xl:col-3">
           <div className="dashboard-wrapper">
             <StatBox
-              title="1,325,134"
+              title={transactions?.length}
               subtitle="Transactions"
               progress="0.80"
               increase="+43%"
-              icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
+            // icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
             />
           </div>
         </div>
