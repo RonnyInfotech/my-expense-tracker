@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { CASHFLOW } from "./constants";
 
 export const updateContext = (array, Id, state) => {
     return array?.map((ele) => {
@@ -30,4 +31,23 @@ export const getFileNameFromUrl = (url) => {
     const fileName = pathname.substring(pathname.lastIndexOf('/') + 1);
 
     return fileName;
+};
+
+// Function to calculateIncomeExpenseAndBalance
+export const calculateIncomeExpenseAndBalance = (transactions) => {
+    const { totalIncome, totalExpense } = transactions.reduce((acc, { Cashflow, Amount }) => {
+        acc[Cashflow === CASHFLOW.Income ? 'totalIncome' : 'totalExpense'] += Amount;
+        return acc;
+    }, { totalIncome: 0, totalExpense: 0 });
+
+    const total = totalIncome + totalExpense;
+
+    return {
+        totalIncome,
+        totalExpense,
+        balance: totalIncome - totalExpense,
+        incomePercentage: (totalIncome / total) * 100,
+        expensePercentage: (totalExpense / total) * 100,
+        balancePercentage: ((totalIncome - totalExpense) / total) * 100
+    };
 };
