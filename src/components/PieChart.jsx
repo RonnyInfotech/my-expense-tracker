@@ -13,17 +13,17 @@ const PieChart = ({ isDashboard = false }) => {
                 axis: {
                     domain: {
                         line: {
-                            stroke: colors.grey[100]
+                            stroke: colors.primary[500]
                         }
                     },
                     legend: {
                         text: {
-                            fill: colors.grey[100]
+                            fill: colors.primary[500]
                         }
                     },
                     ticks: {
                         line: {
-                            stroke: colors.grey[100],
+                            stroke: colors.primary[500],
                             strokeWidth: 1
                         },
                         text: {
@@ -33,7 +33,7 @@ const PieChart = ({ isDashboard = false }) => {
                 },
                 legends: {
                     text: {
-                        fill: colors.grey[100]
+                        fill: colors.primary[500]
                     }
                 },
                 tooltip: {
@@ -49,7 +49,7 @@ const PieChart = ({ isDashboard = false }) => {
             padAngle={0.7}
             cornerRadius={3}
             activeOuterRadiusOffset={8}
-            animate={true}
+            animate={false}
             borderWidth={1}
             borderColor={{
                 from: 'color',
@@ -95,31 +95,31 @@ const PieChart = ({ isDashboard = false }) => {
                 }
             ]}
 
-            legends={[
-                {
-                    anchor: 'right',
-                    direction: 'column',
-                    justify: false,
-                    translateX: 0,
-                    translateY: 56,
-                    itemsSpacing: 2,
-                    itemWidth: 200,
-                    itemHeight: 18,
-                    itemTextColor: colors.grey[100],
-                    itemDirection: 'left-to-right',
-                    itemOpacity: 1,
-                    symbolSize: 18,
-                    symbolShape: 'square',
-                    effects: [
-                        {
-                            on: 'hover',
-                            style: {
-                                itemTextColor: colors.greenAccent[400],
-                            }
-                        }
-                    ]
-                }
-            ]}
+            // legends={[
+            //     {
+            //         anchor: 'right',
+            //         direction: 'column',
+            //         justify: false,
+            //         translateX: 0,
+            //         translateY: 56,
+            //         itemsSpacing: 2,
+            //         itemWidth: 200,
+            //         itemHeight: 18,
+            //         itemTextColor: colors.primary[100],
+            //         itemDirection: 'left-to-right',
+            //         itemOpacity: 1,
+            //         symbolSize: 18,
+            //         symbolShape: 'square',
+            //         effects: [
+            //             {
+            //                 on: 'hover',
+            //                 style: {
+            //                     itemTextColor: colors.greenAccent[400],
+            //                 }
+            //             }
+            //         ]
+            //     }
+            // ]}
         />
     )
 

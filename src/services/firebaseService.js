@@ -9,7 +9,6 @@ export const getAllItems = async (listName) => {
 
 export const getItemById = async (listName, Id) => {
     const result = await getDoc(doc(db, listName, Id));
-    console.log(result.data())
     return result.data();
 };
 
@@ -24,7 +23,6 @@ export const filterItem = async (listName, column, value) => {
             ..._res.data()
         })
     });
-    console.log("result..", result);
     return result;
 };
 
@@ -32,7 +30,6 @@ export const addItem = async (listName, itemData) => {
     try {
         return await addDoc(collection(db, listName), itemData);
         // const docSnapshot = await getDoc(docRef);
-        // console.log("doc_refs...", docSnapshot.data());
         // return docRef.id;
     } catch (error) {
         console.log(error);
