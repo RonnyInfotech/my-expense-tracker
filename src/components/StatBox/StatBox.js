@@ -1,11 +1,7 @@
-import { useTheme } from "@mui/material";
 import ProgressCircle from "../ProgressCircle";
-import { tokens } from "../../theme";
 import './StatBox.css';
 
 const StatBox = ({ title, subtitle, progress, increase, icon }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
 
   return (
     <div className="w-full" style={{ margin: '20px 30px' }}>

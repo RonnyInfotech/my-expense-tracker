@@ -77,7 +77,7 @@ const AllTransactions = () => {
       <div className="flex align-items-center" >
         <img alt={rowData.PaymentMode} src={require(`../../assets/Images/${getPaymentIcon(rowData)}`)} className='mr-2' style={{ width: '2rem' }} />
         <div>{rowData.PaymentMode}</div>
-      </ div >
+      </div >
     )
   };
 

@@ -2,27 +2,25 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { tokens } from "../../theme";
 import Header from "../../components/Header/Header";
 import StatBox from "../../components/StatBox/StatBox";
 import { Button } from 'primereact/button';
 import AccountBalance from "../../components/AccountBalance/AccountBalance";
 import IncomeExpense from "../../components/IncomeExpense/IncomeExpense";
 import RecentTransactions from "../../components/RecentTransactions/RecentTransactions";
-import './Dashboard.css';
 import { useContext } from "react";
 import { ExpenseContext } from "../../contexts/ExpenseContext";
 import { calculateIncomeExpenseAndBalance } from "../../common/commonFunction";
+import TotalExpenses from "../../components/TotalExpenses/TotalExpenses.js";
+import './Dashboard.css';
 
 const Dashboard = () => {
   const { transactions } = useContext(ExpenseContext);
   const theme = useTheme();
   const smScreen = useMediaQuery(theme.breakpoints.up("sm"));
-
-  const result = calculateIncomeExpenseAndBalance(transactions);
   const { totalIncome, totalExpense, balance, incomePercentage, expensePercentage, balancePercentage } = calculateIncomeExpenseAndBalance(transactions);
-  console.log("transactions>>>>>>>>>>", transactions);
-  
+
+  console.log("transactions...", transactions);
   return (
     <div style={{ margin: '20px' }}>
       {/* HEADER */}
@@ -77,12 +75,11 @@ const Dashboard = () => {
               subtitle="Transactions"
               progress="0.80"
               increase="+43%"
-            // icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
             />
           </div>
         </div>
-        <div className="col-12" style={{ border: '1px solid' }}>
-          {/* <Pie /> */}
+        <div className="col-12">
+          <TotalExpenses />
         </div>
         <div className="col-12 md:col-6">
           <AccountBalance />

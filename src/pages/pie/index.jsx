@@ -9,7 +9,7 @@ const Bar = () => {
     // const theme = useTheme()
     // const colors = tokens(theme.palette.mode)
     return (
-        <div className='my-6' style={{ height: '45vh' }}>
+        <div className='my-6' style={{ height: '45vh', width: '100%' }} >
             <Header title="BAR CHART" subtitle="simple bar chart" />
             <PieChart />
         </div>

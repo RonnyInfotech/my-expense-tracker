@@ -56,11 +56,8 @@ const FileViewer = ({ FilesItem, item }) => {
                     ...item,
                     Files: updateFileArr
                 };
-                console.log("state...new", item);
-                console.log("saveState...", saveState);
                 await updateItem(LISTS.TRANSACTIONS.NAME, saveState.Id, saveState).then(() => {
                     const res = updateContext(transactions, saveState.Id, saveState);
-                    console.log("res........", res);
                     setTransactions(res);
                     setUpdateFileState(saveState);
                 });
