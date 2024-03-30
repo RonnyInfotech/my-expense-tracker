@@ -33,7 +33,6 @@ export const getFileNameFromUrl = (url) => {
     return fileName;
 };
 
-// Function to calculateIncomeExpenseAndBalance
 export const calculateIncomeExpenseAndBalance = (transactions) => {
     const { totalIncome, totalExpense } = transactions.reduce((acc, { Cashflow, Amount }) => {
         acc[Cashflow === CASHFLOW.Income ? 'totalIncome' : 'totalExpense'] += Amount;
@@ -51,7 +50,6 @@ export const calculateIncomeExpenseAndBalance = (transactions) => {
         balancePercentage: ((totalIncome - totalExpense) / total) * 100
     };
 };
-
 
 export const sumAndPercentageSimilarCategories = (transactions) => {
     const categorySums = {};
@@ -115,4 +113,4 @@ export const calculateIncomeAndExpenseByMonth = (transactions) => {
 
     // Convert result object to array
     return Object.values(result);
-}
+};

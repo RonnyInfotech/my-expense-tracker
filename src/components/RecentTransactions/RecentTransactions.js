@@ -70,11 +70,11 @@ const RecentTransactions = () => {
                 globalFilter={globalFilter}
                 header={header}
             >
-                <Column style={{ width: '8rem' }} field="_Date" header="Date"></Column>
-                <Column style={{ width: '8rem' }} field="Category.name" header="Category" body={categoryBodyTemplate}></Column>
-                <Column style={{ width: '10rem' }} field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate}></Column>
-                <Column field="Description" header="Description"></Column>
                 <Column style={{ width: '10rem' }} field="Amount" header="Amount" body={priceBodyTemplate}></Column>
+                <Column field="Description" header="Description"></Column>
+                <Column style={{ width: '8rem' }} field="Category.name" header="Category" body={categoryBodyTemplate}></Column>
+                <Column style={{ width: '8rem' }} field="_Date" header="Date"></Column>
+                <Column style={{ width: '10rem' }} field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate}></Column>
             </DataTable>
         </div>
     );

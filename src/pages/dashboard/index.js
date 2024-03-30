@@ -21,6 +21,7 @@ const Dashboard = () => {
   const { totalIncome, totalExpense, balance, incomePercentage, expensePercentage, balancePercentage } = calculateIncomeExpenseAndBalance(transactions);
 
   console.log("transactions...", transactions);
+  
   return (
     <div style={{ margin: '20px' }}>
       {/* HEADER */}

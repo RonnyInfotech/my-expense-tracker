@@ -5,7 +5,7 @@ import { useProSidebar } from "react-pro-sidebar";
 import { useSidebarContext } from "./sidebarContext";
 import { Link } from "react-router-dom";
 import { tokens } from "../../../theme";
-import { useTheme, Typography } from "@mui/material";
+import { useTheme } from "@mui/material";
 import { calculateIncomeExpenseAndBalance } from "../../../common/commonFunction";
 import { ExpenseContext } from "../../../contexts/ExpenseContext";
 import './MyProSidebar.css';

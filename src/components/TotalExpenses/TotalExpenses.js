@@ -5,8 +5,6 @@ import { ResponsivePie } from '@nivo/pie';
 
 const TotalExpenses = () => {
     const { transactions } = useContext(ExpenseContext);
-    const [chartData, setChartData] = useState({});
-    const [chartOptions, setChartOptions] = useState({});
 
     const formatCurrency = (value) => {
         return value.toLocaleString('en-IN', { style: 'currency', maximumFractionDigits: 2, currency: 'INR' });
@@ -16,44 +14,6 @@ const TotalExpenses = () => {
     const expenses = res.map((ele) => { return { id: ele.code, label: ele.name, value: ele.sum, color: ele.color } })
 
     useEffect(() => {
-        // const data = {
-        //     labels: expenses.map(({ name }) => name),
-        //     datasets: [
-        //         {
-        //             data: expenses.map(({ sum }) => sum),
-        //             backgroundColor: expenses.map(({ color }) => color),
-        //             hoverBackgroundColor: expenses.map(({ color }) => color)
-        //         }
-        //     ]
-        // };
-        // const options = {
-        //     cutout: '60%',
-        //     responsive: true,
-        //     maintainAspectRatio: false,
-        //     aspectRatio: 0.7,
-        //     layout: {
-        //         padding: {
-        //             left: 20,
-        //             right: 20,
-        //             top: 20,
-        //             bottom: 20
-        //         }
-        //     },
-        //     plugins: {
-        //         legend: {
-        //             display: false,
-        //             labels: {
-        //                 usePointStyle: true,
-        //                 boxWidth: 40,
-        //             },
-        //             position: 'right',
-        //             align: 'start'
-        //         }
-        //     },
-        // };
-
-        // setChartData(data);
-        // setChartOptions(options);
     }, [transactions]);
 
     const tooltipStyle = {
@@ -81,7 +41,6 @@ const TotalExpenses = () => {
             <p className='chart-header'>Total Expense</p>
             <div className='grid'>
                 <div className='col-12 md:col-12 lg:col-6 xl:col-6' style={{ height: '50vh' }}>
-                    {/* <Chart type="doughnut" data={chartData} options={chartOptions} style={{ height: '45vh' }} /> */}
                     <ResponsivePie
                         data={expenses}
                         colors={expenses.map(({ color }) => color)}
@@ -107,6 +66,8 @@ const TotalExpenses = () => {
                         motionDamping={15}
                         enableArcLabels={false}
                         activeOuterRadiusOffset={8}
+                        // arcLinkLabelsOffset={-12}
+                        // arcLinkLabelsStraightLength={7}
                         tooltip={CustomTooltip}
                     />
                 </div>
