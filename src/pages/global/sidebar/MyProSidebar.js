@@ -127,30 +127,16 @@ const MyProSidebar = () => {
               setSelected={setSelected}
             />
 
-            <h5 className="menu-header">
+            {/* <h5 className="menu-header">
               Admin
             </h5>
             <Item
               title="Categories"
-              to="/form"
+              to="/categories"
               icon={<i className="fa fa-archive" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
-            />
-            <Item
-              title="Report"
-              to="/calendar"
-              icon={<i className="fa fa-calendar-o" aria-hidden="true" />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="FAQ Page"
-              to="/faq"
-              icon={<i className="fa fa-question-circle-o" aria-hidden="true" />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+            /> */}
           </div>
         </Menu>
       </Sidebar>

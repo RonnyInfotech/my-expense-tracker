@@ -8,12 +8,11 @@ import "../node_modules/primeflex/primeflex.css";
 import "../node_modules/primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 import Dashboard from "./pages/dashboard";
-import Form from "./pages/form";
-import Calendar from "./pages/calendar";
 import Expense from "./pages/Expense/Expense";
 import Income from "./pages/Income/Income";
 import AllTransactions from "./pages/AllTransactions/AllTransactions";
 import ExpenseContextProvider from "./contexts/ExpenseContext";
+import Categories from "./pages/Categories/Categories";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -21,7 +20,7 @@ const App = () => {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <ExpenseContextProvider>
+        <ExpenseContextProvider >
           <MyProSidebarProvider>
             <div style={{ height: "100%", width: "100%" }}>
               <main>
@@ -31,8 +30,7 @@ const App = () => {
                   <Route path="/income" element={<Income />} />
                   <Route path="/expense" element={<Expense />} />
                   <Route path="/allTransactions" element={<AllTransactions />} />
-                  <Route path="/form" element={<Form />} />
-                  <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/categories" element={<Categories />} />
                 </Routes>
               </main>
             </div>

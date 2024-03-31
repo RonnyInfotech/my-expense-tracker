@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import { useMediaQuery } from "@mui/material";
 import Header from '../../components/Header/Header';
 
-const Form = () => {
+const Categories = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const phoneRegExp = /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
   const handleFormSubmit = (values) => {
@@ -136,4 +136,4 @@ const Form = () => {
   );
 }
 
-export default Form
+export default Categories;
