@@ -44,10 +44,10 @@ const MyProSidebar = () => {
   return (
     <div className="side-bar-menu">
       <Sidebar
-        defaultCollapsed={true}
+        // defaultCollapsed={true}
         breakPoint="md"
         rtl={sidebarRTL}
-        backgroundColor={colors.primary[400]}
+        backgroundColor='white'
         image={sidebarImage}
         transitionDuration={1000}
       >
@@ -126,7 +126,6 @@ const MyProSidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-
             {/* <h5 className="menu-header">
               Admin
             </h5>

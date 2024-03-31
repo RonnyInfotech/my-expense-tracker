@@ -1,5 +1,3 @@
-import { ColorModeContext, useMode } from "./theme";
-import { CssBaseline, ThemeProvider } from "@mui/material";
 import { Routes, Route } from "react-router-dom";
 import { MyProSidebarProvider } from "./pages/global/sidebar/sidebarContext";
 import Topbar from "./pages/global/Topbar";
@@ -15,29 +13,52 @@ import ExpenseContextProvider from "./contexts/ExpenseContext";
 import Categories from "./pages/Categories/Categories";
 
 const App = () => {
-  const [theme, colorMode] = useMode();
   return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <ExpenseContextProvider >
-          <MyProSidebarProvider>
-            <div style={{ height: "100%", width: "100%" }}>
-              <main>
-                <Topbar />
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/income" element={<Income />} />
-                  <Route path="/expense" element={<Expense />} />
-                  <Route path="/allTransactions" element={<AllTransactions />} />
-                  <Route path="/categories" element={<Categories />} />
-                </Routes>
-              </main>
-            </div>
-          </MyProSidebarProvider>
-        </ExpenseContextProvider>
-      </ThemeProvider>
-    </ColorModeContext.Provider>
+    // <ColorModeContext.Provider value={colorMode}>
+    // <ThemeProvider theme={theme}>
+    <>
+      {/* <CssBaseline /> */}
+      <ExpenseContextProvider >
+        <MyProSidebarProvider>
+          <div style={{ height: "100%", width: "100%" }}>
+            <main>
+              <Topbar />
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/income" element={<Income />} />
+                <Route path="/expense" element={<Expense />} />
+                <Route path="/allTransactions" element={<AllTransactions />} />
+                <Route path="/categories" element={<Categories />} />
+              </Routes>
+            </main>
+          </div>
+        </MyProSidebarProvider>
+      </ExpenseContextProvider>
+    </>
+    // </ThemeProvider>
+    // </ColorModeContext.Provider>
+
+    // <ColorModeContext.Provider value={colorMode}>
+    //   <ThemeProvider theme={theme}>
+    //     {/* <CssBaseline /> */}
+    //     <ExpenseContextProvider >
+    //       <MyProSidebarProvider>
+    //         <div style={{ height: "100%", width: "100%" }}>
+    //           <main>
+    //             <Topbar />
+    //             <Routes>
+    //               <Route path="/" element={<Dashboard />} />
+    //               <Route path="/income" element={<Income />} />
+    //               <Route path="/expense" element={<Expense />} />
+    //               <Route path="/allTransactions" element={<AllTransactions />} />
+    //               <Route path="/categories" element={<Categories />} />
+    //             </Routes>
+    //           </main>
+    //         </div>
+    //       </MyProSidebarProvider>
+    //     </ExpenseContextProvider>
+    //   </ThemeProvider>
+    // </ColorModeContext.Provider>
   );
 };
 
