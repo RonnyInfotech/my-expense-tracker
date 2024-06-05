@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/my-expense-tracker/static/css/main.24e9f222.css",
+    "main.js": "/my-expense-tracker/static/js/main.4cb0aee9.js",
+    "static/js/885.807e2138.chunk.js": "/my-expense-tracker/static/js/885.807e2138.chunk.js",
+    "static/js/921.30780ff5.chunk.js": "/my-expense-tracker/static/js/921.30780ff5.chunk.js",
+    "static/media/primeicons.svg": "/my-expense-tracker/static/media/primeicons.e1441b135b3ca9ad643c.svg",
+    "static/media/credit-card.png": "/my-expense-tracker/static/media/credit-card.c2fc1d1e21a0e11f2e5d.png",
+    "static/media/cash.png": "/my-expense-tracker/static/media/cash.c3129c6c1de69fafdb69.png",
+    "static/media/primeicons.eot": "/my-expense-tracker/static/media/primeicons.d44157bdfa026dc877af.eot",
+    "static/media/primeicons.woff": "/my-expense-tracker/static/media/primeicons.10d3152104f2208ac82a.woff",
+    "static/media/primeicons.ttf": "/my-expense-tracker/static/media/primeicons.ea5358601d0a3fd6670b.ttf",
+    "static/media/cash-new.png": "/my-expense-tracker/static/media/cash-new.64f2d7de950e5812512a.png",
+    "static/media/primeicons.woff2": "/my-expense-tracker/static/media/primeicons.78172950b335ccdb94e2.woff2",
+    "static/media/debit-card.png": "/my-expense-tracker/static/media/debit-card.362da01a78b3291de29f.png",
+    "index.html": "/my-expense-tracker/index.html",
+    "main.24e9f222.css.map": "/my-expense-tracker/static/css/main.24e9f222.css.map",
+    "main.4cb0aee9.js.map": "/my-expense-tracker/static/js/main.4cb0aee9.js.map",
+    "885.807e2138.chunk.js.map": "/my-expense-tracker/static/js/885.807e2138.chunk.js.map",
+    "921.30780ff5.chunk.js.map": "/my-expense-tracker/static/js/921.30780ff5.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.24e9f222.css",
+    "static/js/main.4cb0aee9.js"
+  ]
+}
