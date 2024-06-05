@@ -1,41 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { ExpenseContext } from '../../contexts/ExpenseContext';
+import { calculateIncomeAndExpenseByMonth } from '../../common/commonFunction';
 import { Chart } from 'primereact/chart';
+import { monthOrder } from '../../common/constants';
+import './AccountBalance.css';
 
 const AccountBalance = () => {
+    const { transactions } = useContext(ExpenseContext);
     const [chartData, setChartData] = useState({});
     const [chartOptions, setChartOptions] = useState({});
 
+    const incomeAndExpenseByMonth = calculateIncomeAndExpenseByMonth(transactions).sort((a, b) => monthOrder[a.month] - monthOrder[b.month]);
+
     useEffect(() => {
-        const documentStyle = getComputedStyle(document.documentElement);
-        const textColor = documentStyle.getPropertyValue('--text-color');
-        const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-        const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
         const data = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            labels: incomeAndExpenseByMonth.map(({ month }) => month),
             datasets: [
                 {
                     label: 'Amount',
-                    data: [1000, 10000, 8000, 12000, 9000],
+                    data: incomeAndExpenseByMonth.map(({ balance }) => balance),
                     fill: true,
-                    borderColor: documentStyle.getPropertyValue('--blue-500'),
-                    tension: 0.4,
-                    backgroundColor: 'rgba(255,167,38,0.2)'
+                    backgroundColor: 'rgba(4, 112, 216, 0.3)',
                 }
             ]
         };
+
         const options = {
             responsive: true,
             maintainAspectRatio: false,
             aspectRatio: 0.6,
-            // animations: {
-            //     tension: {
-            //         // duration: 1000,
-            //         easing: 'linear',
-            //         from: 1,
-            //         to: 0,
-            //         // loop: true
-            //     }
-            // },
             layout: {
                 padding: {
                     left: 0,
@@ -47,19 +40,17 @@ const AccountBalance = () => {
             plugins: {
                 legend: {
                     labels: {
-                        color: textColor
-                    }
+                        // color: textColor,
+                        // usePointStyle: true,
+                        // boxWidth: 40,
+                    },
+                    position: 'bottom'
                 }
             },
             scales: {
                 x: {
-                    ticks: {
-                        color: textColorSecondary,
-                        // beginAtZero: true,
-                        // padding: 25,
-                    },
                     grid: {
-                        color: surfaceBorder
+                        display: false,
                     }
                 }
             }
@@ -67,11 +58,12 @@ const AccountBalance = () => {
 
         setChartData(data);
         setChartOptions(options);
-    }, []);
+    }, [transactions]);
 
     return (
         <div className="card mt-3 p-3">
-            <Chart type="line" data={chartData} options={chartOptions} />
+            <p className='chart-header'>Account - Balance</p>
+            <Chart type="line" data={chartData} options={chartOptions} style={{ height: '40vh' }} />
         </div>
     )
 }

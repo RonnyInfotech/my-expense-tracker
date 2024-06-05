@@ -1,18 +1,14 @@
-import { useTheme } from "@mui/material";
 import ProgressCircle from "../ProgressCircle";
-import { tokens } from "../../theme";
 import './StatBox.css';
 
-const StatBox = ({ title, subtitle, progress, increase, icon }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+const StatBox = ({ className, title, subtitle, progress, increase, icon }) => {
 
   return (
     <div className="w-full" style={{ margin: '20px 30px' }}>
       <div className="flex justify-content-between">
         <div className="flex">
           {icon}
-          <div className="dashboard-tile-amount ml-2">
+          <div className={`dashboard-tile-amount ml-2 ${className}`}>
             {title}
           </div>
         </div>

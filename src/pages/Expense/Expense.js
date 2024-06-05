@@ -156,14 +156,11 @@ const Expense = () => {
         }, (error) => console.log(error), async () => {
           await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
             setURLs(prevState => [...prevState, downloadURLs]);
-            console.log("File available at", downloadURLs);
           });
         }
       );
     })
   };
-
-  console.log("demo>>>>>>>>>>>>>>", state?.Files?.concat(urls));
 
   const saveExpense = async () => {
     if (!Description.trim().length || !TransactionDate || !TransactionTime || !PaymentMode || !Category || !Amount) {
