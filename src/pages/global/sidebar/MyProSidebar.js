@@ -5,7 +5,7 @@ import { useProSidebar } from "react-pro-sidebar";
 import { useSidebarContext } from "./sidebarContext";
 import { Link } from "react-router-dom";
 import { tokens } from "../../../theme";
-import { useTheme, Typography } from "@mui/material";
+import { useTheme } from "@mui/material";
 import { calculateIncomeExpenseAndBalance } from "../../../common/commonFunction";
 import { ExpenseContext } from "../../../contexts/ExpenseContext";
 import './MyProSidebar.css';
@@ -44,10 +44,10 @@ const MyProSidebar = () => {
   return (
     <div className="side-bar-menu">
       <Sidebar
-        defaultCollapsed={true}
+        // defaultCollapsed={true}
         breakPoint="md"
         rtl={sidebarRTL}
-        backgroundColor={colors.primary[400]}
+        backgroundColor='white'
         image={sidebarImage}
         transitionDuration={1000}
       >
@@ -126,31 +126,16 @@ const MyProSidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-
-            <h5 className="menu-header">
+            {/* <h5 className="menu-header">
               Admin
             </h5>
             <Item
               title="Categories"
-              to="/form"
+              to="/categories"
               icon={<i className="fa fa-archive" aria-hidden="true" />}
               selected={selected}
               setSelected={setSelected}
-            />
-            <Item
-              title="Report"
-              to="/calendar"
-              icon={<i className="fa fa-calendar-o" aria-hidden="true" />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="FAQ Page"
-              to="/faq"
-              icon={<i className="fa fa-question-circle-o" aria-hidden="true" />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+            /> */}
           </div>
         </Menu>
       </Sidebar>

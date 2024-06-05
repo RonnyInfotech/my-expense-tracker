@@ -13,10 +13,6 @@ const AccountBalance = () => {
     const incomeAndExpenseByMonth = calculateIncomeAndExpenseByMonth(transactions).sort((a, b) => monthOrder[a.month] - monthOrder[b.month]);
 
     useEffect(() => {
-        // const documentStyle = getComputedStyle(document.documentElement);
-        // const textColor = documentStyle.getPropertyValue('--text-color');
-        // const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-        // const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
         const data = {
             labels: incomeAndExpenseByMonth.map(({ month }) => month),
             datasets: [
@@ -53,12 +49,8 @@ const AccountBalance = () => {
             },
             scales: {
                 x: {
-                    ticks: {
-                        // color: textColorSecondary,
-                    },
                     grid: {
                         display: false,
-                        // color: surfaceBorder
                     }
                 }
             }

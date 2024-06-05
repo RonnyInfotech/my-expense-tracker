@@ -1,14 +1,14 @@
 import ProgressCircle from "../ProgressCircle";
 import './StatBox.css';
 
-const StatBox = ({ title, subtitle, progress, increase, icon }) => {
+const StatBox = ({ className, title, subtitle, progress, increase, icon }) => {
 
   return (
     <div className="w-full" style={{ margin: '20px 30px' }}>
       <div className="flex justify-content-between">
         <div className="flex">
           {icon}
-          <div className="dashboard-tile-amount ml-2">
+          <div className={`dashboard-tile-amount ml-2 ${className}`}>
             {title}
           </div>
         </div>

@@ -1,10 +1,25 @@
+.tolincome {
+    color: #4d80f3;
+}
+
+.tolexpense {
+    color: #fb6d9d;
+}
+
+.tolbalance {
+    color: #81c868;
+}
+
+.toltransaction {
+    color: #34d3eb;
+}
+
 .dashboard-tile-amount {
     margin: 0px;
     font-family: "Source Sans Pro", sans-serif;
     font-size: 24px;
     line-height: .8;
     font-weight: 700;
-    color: rgb(224, 224, 224);
 }
 
 .dashboard-tile-title {

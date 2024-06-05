@@ -21,6 +21,7 @@ const Dashboard = () => {
   const { totalIncome, totalExpense, balance, incomePercentage, expensePercentage, balancePercentage } = calculateIncomeExpenseAndBalance(transactions);
 
   console.log("transactions...", transactions);
+
   return (
     <div style={{ margin: '20px' }}>
       {/* HEADER */}
@@ -38,39 +39,43 @@ const Dashboard = () => {
         <div className="col-12 md:col-12 lg:col-6 xl:col-3">
           <div className="dashboard-wrapper">
             <StatBox
+              className='tolincome'
               title={totalIncome?.toLocaleString()}
               subtitle="Income"
               progress={incomePercentage / 100}
               increase={incomePercentage.toFixed(2) + '%'}
-              icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
+              icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px', color: '#4d80f3' }} />}
             />
           </div>
         </div>
         <div className="col-12 md:col-12 lg:col-6 xl:col-3">
           <div className="dashboard-wrapper">
             <StatBox
+              className='tolexpense'
               title={totalExpense?.toLocaleString()}
               subtitle="Expenses"
               progress={expensePercentage / 100}
               increase={expensePercentage.toFixed(2) + '%'}
-              icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
+              icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px', color: '#fb6d9d' }} />}
             />
           </div>
         </div>
         <div className="col-12 md:col-12 lg:col-6 xl:col-3">
           <div className="dashboard-wrapper">
             <StatBox
+              className='tolbalance'
               title={balance?.toLocaleString()}
               subtitle="Balance"
               progress={balancePercentage / 100}
               increase={balancePercentage.toFixed(2) + '%'}
-              icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px' }} />}
+              icon={<i className="fa fa-inr" aria-hidden="true" style={{ fontSize: '26px', color: '#81c868' }} />}
             />
           </div>
         </div>
         <div className="col-12 md:col-12 lg:col-6 xl:col-3">
           <div className="dashboard-wrapper">
             <StatBox
+              className='toltransaction'
               title={transactions?.length}
               subtitle="Transactions"
               progress="0.80"
