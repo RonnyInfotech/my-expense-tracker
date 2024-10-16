@@ -9,4 +9,4 @@ export class income {
     Category = null;
     Amount = null;
     Files = null;
-}
+};
