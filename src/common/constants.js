@@ -10,6 +10,8 @@ export const INCOME_CATEGORY = [
     { name: 'Business', code: 'Business', image: 'business.png' },
     { name: 'Extra income', code: 'ExtraIncome', image: 'extra.png' },
 ];
+// export const INCOME_CATEGORY_FITER = ['Salary', 'Interests', 'Business', 'Extra income']
+export const PAYMENT_MOD_FITER = ['CreditCard', 'DebitCard', 'Cash']
 
 export const EXPENSE_CATEGORY = [
     { name: 'Rent', code: 'Rent', image: 'rent.png', color: '#61EFCD' },

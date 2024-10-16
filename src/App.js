@@ -7,10 +7,10 @@ import "../node_modules/primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 import Dashboard from "./pages/dashboard";
 import Expense from "./pages/Expense/Expense";
-import Income from "./pages/Income/Income";
 import AllTransactions from "./pages/AllTransactions/AllTransactions";
 import ExpenseContextProvider from "./contexts/ExpenseContext";
 import Categories from "./pages/Categories/Categories";
+import Income from "./pages/income/Income";
 
 const App = () => {
   return (

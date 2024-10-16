@@ -12,7 +12,7 @@ const Topbar = () => {
   const { toggleSidebar, broken, rtl } = useProSidebar();
 
   return (
-    <div className="flex justify-content-between p-3">
+    <div className="flex justify-content-between">
       <div className="flex">
         {broken && !rtl && (
           <IconButton

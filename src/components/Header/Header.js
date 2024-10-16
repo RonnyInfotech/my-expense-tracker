@@ -4,7 +4,7 @@ import './Header.css';
 const Header = ({ title, subtitle }) => {
 
   return (
-    <div style={{ marginBottom: '30px' }}>
+    <div className="mb-4">
       <div className="header-title">
         {title}
       </div>

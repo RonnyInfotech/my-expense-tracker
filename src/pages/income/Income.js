@@ -6,14 +6,14 @@ import {
 } from 'primereact';
 import { addItem, deleteItem, updateItem } from '../../services/firebaseService';
 import CustomSpinner from '../../components/CustomSpinner/CustomSpinner';
-import { CASHFLOW, INCOME_CATEGORY, LISTS } from '../../common/constants';
+import { CASHFLOW, INCOME_CATEGORY, INCOME_CATEGORY_FITER, LISTS, PAYMENT_MOD_FITER } from '../../common/constants';
 import { sortArray, updateContext } from '../../common/commonFunction';
 import Header from "../../components/Header/Header";
 import { income } from '../../Models/income';
 import { format } from 'date-fns';
 import { ColumnGroup } from 'primereact/columngroup';
 import { Row } from 'primereact/row';
-import { FilterMatchMode } from 'primereact/api';
+import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import FileViewer from '../../components/FileViewer/FileViewer';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { storage } from '../../services/firebase';
@@ -35,17 +35,22 @@ const Income = () => {
   const [urls, setURLs] = useState([]);
   const toast = useRef(null);
   const dt = useRef(null);
-  const [filters, setFilters] = useState({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'Category.name': { value: null, matchMode: FilterMatchMode.CONTAINS },
-    _Date: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    _Time: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    _Day: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    PaymentMode: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    Description: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    Amount: { value: null, matchMode: FilterMatchMode.CONTAINS }
-  });
+  const [filters, setFilters] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
+
+  const initFilters = () => {
+    setFilters({
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+      'Category.name': { value: null, matchMode: FilterMatchMode.CONTAINS },
+      _Date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
+      _Time: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
+      _Day: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
+      PaymentMode: { value: null, matchMode: FilterMatchMode.CONTAINS },
+      Description: { value: null, matchMode: FilterMatchMode.EQUALS },
+      Amount: { value: null, matchMode: FilterMatchMode.EQUALS }
+    });
+    setGlobalFilterValue('');
+  };
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
@@ -62,6 +67,10 @@ const Income = () => {
   useEffect(() => {
     getIncomesItems();
   }, [transactions]);
+
+  useEffect(() => {
+    initFilters();
+  }, []);
 
   useEffect(() => {
     if (updateFileState) {
@@ -85,6 +94,18 @@ const Income = () => {
     dt.current.exportCSV();
   };
 
+  const selectedCategoryFilterTemplate = (option, props) => {
+    if (option) {
+      let optionData = INCOME_CATEGORY.find(category => category.name == option)
+      return (
+        <div className="flex align-items-center">
+          <img alt={optionData.name} src={require(`../../assets/Images/category/${optionData.image}`)} className={`mr-2 flag flag-${optionData.code.toLowerCase()}`} style={{ width: '18px' }} />
+          <div>{optionData.name}</div>
+        </div>
+      );
+    }
+    return <span>{props.placeholder}</span>;
+  };
   const selectedCategoryTemplate = (option, props) => {
     if (option) {
       return (
@@ -97,11 +118,42 @@ const Income = () => {
     return <span>{props.placeholder}</span>;
   };
 
+  const categoryOptionFilterTemplate = (option) => {
+    let optionData = INCOME_CATEGORY.find(category => category.name == option)
+    return (
+      <div className="flex align-items-center">
+        <img alt={optionData.name} src={require(`../../assets/Images/category/${optionData.image}`)} className={`mr-2 flag flag-${optionData.code.toLowerCase()}`} style={{ width: '18px' }} />
+        <div>{optionData.name}</div>
+      </div>
+    );
+  };
+
   const categoryOptionTemplate = (option) => {
     return (
       <div className="flex align-items-center">
         <img alt={option.name} src={require(`../../assets/Images/category/${option.image}`)} className={`mr-2 flag flag-${option.code.toLowerCase()}`} style={{ width: '18px' }} />
         <div>{option.name}</div>
+      </div>
+    );
+  };
+
+  const selectedPaymentModTemplate = (option, props) => {
+    if (option) {
+      return (
+        <div className="flex align-items-center">
+          <img alt={option} src={require(`../../assets/Images/${getPaymentIcon({ PaymentMode: option })}`)} className='mr-2' style={{ width: '2rem' }} />
+          <div>{option}</div>
+        </div>
+      );
+    }
+    return <span>{props.placeholder}</span>;
+  };
+
+  const paymentModOptionTemplate = (option) => {
+    return (
+      <div className="flex align-items-center">
+        <img alt={option} src={require(`../../assets/Images/${getPaymentIcon({ PaymentMode: option })}`)} className='mr-2' style={{ width: '2rem' }} />
+        <div>{option}</div>
       </div>
     );
   };
@@ -226,14 +278,14 @@ const Income = () => {
   const leftToolbarTemplate = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button label="Add Income" icon="pi pi-plus" severity="success" onClick={openNew} />
-        <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedIncomes || !selectedIncomes.length} />
+        <Button label="Add Income" className='border-none shadow-none text-color-secondary' icon="pi pi-plus" text onClick={openNew} />
+        <Button label="Delete" className='border-none shadow-none text-color-secondary' icon="pi pi-trash" text onClick={confirmDeleteSelected} disabled={!selectedIncomes || !selectedIncomes.length} />
       </div>
     );
   };
 
   const rightToolbarTemplate = () => {
-    return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+    return <Button label="Export" className='border-none shadow-none text-color-secondary' icon="pi pi-upload" text onClick={exportCSV} />;
   };
 
   const formatCurrency = (value) => {
@@ -279,7 +331,7 @@ const Income = () => {
       <div className="flex align-items-center" >
         <img alt={rowData.PaymentMode} src={require(`../../assets/Images/${getPaymentIcon(rowData)}`)} className='mr-2' style={{ width: '2rem' }} />
         <div>{rowData.PaymentMode}</div>
-      </ div >
+      </div>
     )
   };
 
@@ -291,13 +343,16 @@ const Income = () => {
     return formatCurrency(total);
   };
 
-  const header = (
+  const incomeDataTableHeader = (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
       <h4 className="m-0">Manage Income</h4>
-      <span className="p-input-icon-left">
-        <i className="pi pi-search" />
-        <InputText value={globalFilterValue} onChange={onGlobalFilterChange} type="search" placeholder="Search..." />
-      </span>
+      <div>
+        <span className="p-input-icon-left">
+          <i className="pi pi-search" />
+          <InputText value={globalFilterValue} onChange={onGlobalFilterChange} type="search" placeholder="Search..." />
+        </span>
+        <Button className='ml-2 border-none shadow-none' severity="secondary" title='Clear Filter' icon="pi pi-filter-slash" text onClick={() => initFilters()} />
+      </div>
     </div>
   );
 
@@ -339,35 +394,62 @@ const Income = () => {
     );
   };
 
+  const filterClearTemplate = (options) => {
+    return <Button className='filter-clear cursor-pointer p-0 px-2' type="button" icon="pi pi-times" label="Clear" onClick={options.filterClearCallback} text></Button>;
+  };
+
+  const filterApplyTemplate = (options) => {
+    return <Button className='filter-apply cursor-pointer p-0 px-2' type="button" icon="pi pi-check" label="Apply" onClick={options.filterApplyCallback} text></Button>;
+  };
+
+  const categoryFilterTemplate = (options) => {
+    return <Dropdown value={options.value} options={INCOME_CATEGORY.map(category => category.name)} onChange={(e) => options.filterCallback(e.value, options.index)} placeholder="Select Category" className="p-column-filter" valueTemplate={selectedCategoryFilterTemplate} itemTemplate={categoryOptionFilterTemplate} showClear />;
+  };
+
+  const paymentFilterTemplate = (options) => {
+    return <Dropdown value={options.value} options={PAYMENT_MOD_FITER} onChange={(e) => options.filterCallback(e.value, options.index)} placeholder="Select Paymant Mode" className="p-column-filter" valueTemplate={selectedPaymentModTemplate} itemTemplate={paymentModOptionTemplate} showClear />;
+  };
+
   return (
-    <div style={{ margin: '20px' }}>
+    <div className='mx-4 mt-3'>
       <Toast ref={toast} />
       <BlockUI blocked={blocked} fullScreen template={<CustomSpinner />} />
       <div className="flex justify-content-between align-items-center">
         <Header title="INCOME" subtitle="Manage Income" />
       </div>
-
-      <div className="card">
-        <Toolbar left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
+      <div>
+        <Toolbar className='py-2' left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
         <DataTable
+          className='income-data-table'
+          value={incomes}
+          paginator
+          showGridlines
+          rows={10}
+          dataKey="Id"
+          filters={filters}
+          globalFilterFields={['_Date', 'Category.name', '_Day', '_Time', 'Amount', 'Description', 'PaymentMode']}
+          header={incomeDataTableHeader}
+          emptyMessage="No customers found."
+          onFilter={(e) => setFilters(e.filters)}
           exportFilename="Incomes"
-          scrollable
-          scrollHeight='57vh'
-          footerColumnGroup={footerGroup} size='small' ref={dt} value={incomes} selection={selectedIncomes} onSelectionChange={(e) => setSelectedIncomes(e.value)}
-          dataKey="Id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+          removableSort
+          footerColumnGroup={footerGroup}
+          size='small'
+          ref={dt}
+          selection={selectedIncomes}
+          onSelectionChange={(e) => setSelectedIncomes(e.value)}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} incomes" filters={filters} filterDisplay="row" header={header}
-          emptyMessage="No Incomes found."
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} incomes"
         >
-          <Column selectionMode="multiple" exportable={false}></Column>
-          <Column header="Actions" body={actionBodyTemplate} exportable={false} ></Column>
-          <Column style={{ minWidth: '10rem' }} field="Category.name" header="Category" body={categoryBodyTemplate} sortable filterField="Category.name" filter filterPlaceholder="Search Category"></Column>
-          <Column style={{ minWidth: '10rem' }} field="_Date" header="Date" sortable filter filterPlaceholder="Search Date"></Column>
-          <Column style={{ minWidth: '10rem' }} field="_Time" header="Time" sortable filter filterPlaceholder="Search Time"></Column>
-          <Column style={{ minWidth: '9rem' }} field="_Day" header="Day" sortable filter filterPlaceholder="Search Day"></Column>
-          <Column style={{ minWidth: '10rem' }} field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable filter filterPlaceholder="Search Payment"></Column>
-          <Column style={{ minWidth: '10rem' }} field="Description" header="Description" sortable filter filterPlaceholder="Search Description"></Column>
-          <Column style={{ minWidth: '11rem' }} field="Amount" header="Amount" body={priceBodyTemplate} sortable filter filterPlaceholder="Search Amount"></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '3rem', textAlign: 'center' }} selectionMode="multiple" exportable={false}></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '2rem', textAlign: 'center' }} header="Actions" body={actionBodyTemplate} exportable={false}></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '8rem' }} showFilterMatchModes={false} field="Category.name" header="Category" body={categoryBodyTemplate} sortable filterField="Category.name" filter filterElement={categoryFilterTemplate}></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '8rem' }} field="_Date" header="Date" sortable filter filterPlaceholder="Search Date"></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '8rem' }} field="_Time" header="Time" sortable filter filterPlaceholder="Search Time"></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '8rem' }} field="_Day" header="Day" sortable filter filterPlaceholder="Search Day"></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '12rem' }} showFilterMatchModes={false} field="PaymentMode" header="Payment Mode" body={paymentModeBodyTemplate} sortable filter filterElement={paymentFilterTemplate}></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '10rem' }} field="Description" header="Description" sortable filter filterPlaceholder="Search Description"></Column>
+          <Column filterClear={filterClearTemplate} filterApply={filterApplyTemplate} style={{ minWidth: '10rem' }} field="Amount" header="Amount" body={priceBodyTemplate} sortable filter filterPlaceholder="Search Amount"></Column>
         </DataTable>
       </div>
 
