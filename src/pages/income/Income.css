@@ -9,7 +9,7 @@
 }
 
 .income-data-table>.p-datatable-wrapper {
-    height: calc(100vh - 248px) !important;
+    max-height: calc(100vh - 248px) !important;
 }
 
 .p-datatable.p-datatable-gridlines .p-paginator-bottom {

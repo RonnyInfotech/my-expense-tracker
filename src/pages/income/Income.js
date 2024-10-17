@@ -42,11 +42,11 @@ const Income = () => {
     setFilters({
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       'Category.name': { value: null, matchMode: FilterMatchMode.CONTAINS },
-      _Date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-      _Time: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-      _Day: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
+      _Date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] },
+      _Time: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] },
+      _Day: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] },
       PaymentMode: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      Description: { value: null, matchMode: FilterMatchMode.EQUALS },
+      Description: { value: null, matchMode: FilterMatchMode.CONTAINS },
       Amount: { value: null, matchMode: FilterMatchMode.EQUALS }
     });
     setGlobalFilterValue('');
@@ -278,14 +278,14 @@ const Income = () => {
   const leftToolbarTemplate = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button label="Add Income" className='border-none shadow-none text-color-secondary' icon="pi pi-plus" text onClick={openNew} />
-        <Button label="Delete" className='border-none shadow-none text-color-secondary' icon="pi pi-trash" text onClick={confirmDeleteSelected} disabled={!selectedIncomes || !selectedIncomes.length} />
+        <Button label="Add Income" severity="success" className='border-none shadow-none' icon="pi pi-plus" onClick={openNew} />
+        <Button label="Delete" severity="danger" className='border-none shadow-none' icon="pi pi-trash" onClick={confirmDeleteSelected} disabled={!selectedIncomes || !selectedIncomes.length} />
       </div>
     );
   };
 
   const rightToolbarTemplate = () => {
-    return <Button label="Export" className='border-none shadow-none text-color-secondary' icon="pi pi-upload" text onClick={exportCSV} />;
+    return <Button label="Export" className='border-none shadow-none' icon="pi pi-upload" severity="help" onClick={exportCSV} />;
   };
 
   const formatCurrency = (value) => {
@@ -423,8 +423,8 @@ const Income = () => {
           className='income-data-table'
           value={incomes}
           paginator
-          showGridlines
           rows={10}
+          rowsPerPageOptions={[5, 10, 25]}
           dataKey="Id"
           filters={filters}
           globalFilterFields={['_Date', 'Category.name', '_Day', '_Time', 'Amount', 'Description', 'PaymentMode']}
