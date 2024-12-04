@@ -55,6 +55,8 @@ const Expense = () => {
     setGlobalFilterValue(value);
   };
 
+  console.log("demo>>>>>>>>>>>>>>>>>>>>", transactions)
+
   const getExpensesItems = () => {
     setExpenses(sortArray(transactions.filter(ele => ele.Cashflow == CASHFLOW.Expense)));
   };
@@ -173,15 +175,27 @@ const Expense = () => {
       delete state['_Time'];
       if (!Id) {
         await addItem(LISTS.TRANSACTIONS.NAME, { ...state, Files: urls }).then((res) => {
-          transactions.push({
+          // transactions.push({
+          //   ...state,
+          //   Id: res.id,
+          //   Files: urls,
+          //   _Day: format(new Date(state.TransactionDate), 'EEEE'),
+          //   _Date: format(new Date(state.TransactionDate), 'dd/MM/yyyy'),
+          //   _Time: format(new Date(state.TransactionTime), 'hh:mm a')
+          // });
+
+          const newTransaction = {
             ...state,
             Id: res.id,
             Files: urls,
             _Day: format(new Date(state.TransactionDate), 'EEEE'),
             _Date: format(new Date(state.TransactionDate), 'dd/MM/yyyy'),
             _Time: format(new Date(state.TransactionTime), 'hh:mm a')
-          });
-          showSuccessToast('Income added successfully');
+          };
+
+          setTransactions(prevTransactions => [...prevTransactions, newTransaction]);
+          console.log("transactions...........", transactions)
+          showSuccessToast('Expense added successfully');
           getExpensesItems();
           setBlocked(false);
         });

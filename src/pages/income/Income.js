@@ -293,7 +293,7 @@ const Income = () => {
   };
 
   const priceBodyTemplate = (rowData) => {
-    return <div style={{ fontWeight: '500' }}>{formatCurrency(rowData.Amount)}</div>
+    return <div className='font-bold'>{formatCurrency(rowData.Amount)}</div>
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -429,7 +429,7 @@ const Income = () => {
           filters={filters}
           globalFilterFields={['_Date', 'Category.name', '_Day', '_Time', 'Amount', 'Description', 'PaymentMode']}
           header={incomeDataTableHeader}
-          emptyMessage="No customers found."
+          emptyMessage="No Expense found."
           onFilter={(e) => setFilters(e.filters)}
           exportFilename="Incomes"
           removableSort
